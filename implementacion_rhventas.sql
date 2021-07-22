@@ -29,6 +29,8 @@ go
 	FOREIGN KEY = Fk_Tabla de origen_Nombre del campo
 */
 
+USE RH_VENTAS
+GO
 
 DROP TABLE IF EXISTS PUESTO
 go
@@ -57,33 +59,8 @@ CREATE TABLE PAIS
 (
 	Pk_Pais_Id int not null,
 	Uk_Nombre nvarchar(40) not null,
-	Fk_Region_RegionId int not null
-)
-go
-
-DROP TABLE IF EXISTS SUCURSAL
-go
-
-CREATE TABLE SUCURSAL 
-(
-	Pk_Sucursal_Id int not null,
-	Direccion nvarchar(60) not null,
-	Distrito nvarchar(20) not null,
-	Provincia nvarchar(40) not null,
-	Fk_Pais_PaisId int not null
-)
-go
-
-DROP TABLE IF EXISTS USUARIO
-go
-
-CREATE TABLE USUARIO
-(
-	Pk_Nombre nvarchar(50) not null,
-	Pass varBinary(8000) not null,
-	Estado char(1) not null,
-	Fk_Empleado_EmpleadoId int not null
-)
+	Fk_Region_Pais_RegionId int not null
+)                        
 go
 
 DROP TABLE IF EXISTS EMPLEADO
@@ -99,7 +76,7 @@ CREATE TABLE EMPLEADO
 	Email nvarchar(50) not null,
 	Nacionalidad nvarchar(40) not null,
 	telefono nvarchar(20) not null,
-	FSupervisor_Id int not null
+	Fk_Empleado_Empleado_SupervisorId int not null
 )
 go
 
@@ -109,22 +86,52 @@ CREATE TABLE DEPARTAMENTO
 (
 	Pk_Departamento_ID int not null,
 	Uk_Nombre nvarchar(40) not null,
-	Fk_Sucursal_SucursalId int not null
+	Fk_Sucursal_Departamento_SucursalId int not null
 )
 GO
 
+DROP TABLE IF EXISTS SUCURSAL
+go
+
+
+CREATE TABLE SUCURSAL
+(
+Pk_Sucursal_Id int not null,
+Direccion nvarchar(60) not null,
+Distrito nvarchar(20) not null,
+Provincia nvarchar(40) not null,
+Fk_Pais_Sucursal_PaisId int not null
+)
+go
+
+
+
+DROP TABLE IF EXISTS USUARIO
+go
+
+
+CREATE TABLE USUARIO
+(
+Pk_Nombre nvarchar(50) not null,
+Pass varBinary(8000) not null,
+Estado char(1) not null,
+Fk_Empleado_Usuario_EmpleadoId int not null
+)
+go
+
 DROP TABLE IF EXISTS EMPLEADO_CONTRATOS
 GO
+
 CREATE TABLE EMPLEADO_CONTRATOS
 (
 	Pk_Contrato_Id int not null,
-	Fk_Empleado_EmpleadoId int not null,
+	Fk_Empleado_EmpleadoContratos_EmpleadoId int not null,
 	Fecha_Inicio date not null,
 	Fecha_Termino date not null,
 	Sueldo_Basico decimal(8,2) not null,
 	Comision_vta decimal(8,2) not null,
-	Fk_Puesto_PuestoId int not null,
-	Fk_Departamento_DepartamentoId int not null
+	Fk_Puesto_EmpleadoContratos_PuestoId int not null,
+	Fk_Departamento_EmpleadoContratos_DepartamentoId int not null
 
 )
 GO
@@ -219,59 +226,59 @@ go
 /*---FOREIGN KEYS---*/
 
 ALTER TABLE PAIS
-DROP CONSTRAINT IF EXISTS Fk_Region_RegionId
+DROP CONSTRAINT IF EXISTS Fk_Region_Pais_RegionId
 go
 ALTER TABLE PAIS
-ADD CONSTRAINT Fk_Region_RegionId FOREIGN KEY(Fk_Region_RegionId)
+ADD CONSTRAINT Fk_Region_Pais_RegionId FOREIGN KEY(Fk_Region_Pais_RegionId)
 REFERENCES REGION(Pk_Region_Id)
 go
 
 ALTER TABLE SUCURSAL
-DROP CONSTRAINT IF EXISTS Fk_Pais_PaisId
+DROP CONSTRAINT IF EXISTS Fk_Pais_Sucursal_PaisId
 go
 ALTER TABLE SUCURSAL
-ADD CONSTRAINT Fk_Pais_PaisId FOREIGN KEY(Fk_Pais_PaisId)
+ADD CONSTRAINT Fk_Pais_Sucursal_PaisId FOREIGN KEY(Fk_Pais_Sucursal_PaisId)
 REFERENCES PAIS(Pk_Pais_Id)
 go
 
 ALTER TABLE DEPARTAMENTO
-DROP CONSTRAINT IF EXISTS Fk_Sucursal_SucursalId
+DROP CONSTRAINT IF EXISTS Fk_Sucursal_Departamento_SucursalId
 go
 ALTER TABLE DEPARTAMENTO
-ADD CONSTRAINT Fk_Sucursal_SucursalId FOREIGN KEY(Fk_Sucursal_SucursalId)
-REFERENCES SUCURSAL(Pk_SucursalId)
+ADD CONSTRAINT Fk_Sucursal_Deparatamento_SucursalId FOREIGN KEY(Fk_Sucursal_Departamento_SucursalId)
+REFERENCES SUCURSAL(Pk_Sucursal_Id)
 go
 
 ALTER TABLE EMPLEADO
-DROP CONSTRAINT IF EXISTS Fk_Empleado_SupervisorId
+DROP CONSTRAINT IF EXISTS Fk_Empleado_Empleado_SupervisorId
 go
 ALTER TABLE EMPLEADO
-ADD CONSTRAINT Fk_Empleado_SupervisorId FOREIGN KEY(FSupervisor_Id)
+ADD CONSTRAINT Fk_Empleado_Empleado_SupervisorId FOREIGN KEY(Fk_Empleado_Empleado_SupervisorId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
 go
 
 ALTER TABLE USUARIO
-DROP CONSTRAINT IF EXISTS Fk_Empleado_EmpleadoId
+DROP CONSTRAINT IF EXISTS Fk_Empleado_Usuario_EmpleadoId
 go
 ALTER TABLE USUARIO
-ADD CONSTRAINT Fk_Empleado_EmpleadoId FOREIGN KEY(Fk_Empleado_EmpleadoId)
+ADD CONSTRAINT Fk_Empleado_Usuario_EmpleadoId FOREIGN KEY(Fk_Empleado_Usuario_EmpleadoId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
 ON DELETE CASCADE	------->  RESTRICCION ELIMINACION EN CASCADA
 go
 
 ALTER TABLE EMPLEADO_CONTRATOS
-DROP CONSTRAINT if  exists Fk_Empleado_EmpleadoId
+DROP CONSTRAINT if  exists Fk_Empleado_EmpleadoContratos_EmpleadoId
 go
 ALTER TABLE EMPLEADO_CONTRATOS
-ADD CONSTRAINT Fk_Empleado_EmpleadoId FOREIGN KEY(Fk_Empleado_EmpleadoId)
+ADD CONSTRAINT Fk_Empleado_EmpleadoContratos_EmpleadoId FOREIGN KEY(Fk_Empleado_EmpleadoContratos_EmpleadoId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
 go
 
 ALTER TABLE EMPLEADO_CONTRATOS
-DROP CONSTRAINT if  exists Fk_Departamento_DepartamentoId
+DROP CONSTRAINT if  exists Fk_Departamento_EmpleadoContratos_DepartamentoId
 go
 ALTER TABLE EMPLEADO_CONTRATOS
-ADD CONSTRAINT Fk_Departamento_DepartamentoId FOREIGN KEY(Fk_Departamento_DepartamentoId)
+ADD CONSTRAINT Fk_Departamento_EmpleadoContratos_DepartamentoId FOREIGN KEY(Fk_Departamento_EmpleadoContratos_DepartamentoId)
 REFERENCES DEPARTAMENTO(Pk_Departamento_Id)
 go
 
@@ -321,3 +328,7 @@ GO
 ALTER TABLE EMPLEADO
 add constraint Ck_Telefono CHECK (Telefono not like '%[^0-9]%')
 GO
+
+/*
+Probando git. . .
+*/
