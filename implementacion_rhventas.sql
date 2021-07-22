@@ -39,7 +39,7 @@ CREATE TABLE PUESTO
 	Pk_Puesto_Id int not null,
 	Nombre nvarchar(40) not null,
 	Salario_Maximo decimal(6,2) not null,
-	Salario_Minimo decimal(4,2) not null
+	Salario_Minimo decimal(6,2) not null
 )
 go
 
@@ -329,7 +329,47 @@ ALTER TABLE EMPLEADO
 add constraint Ck_Telefono CHECK (Telefono not like '%[^0-9]%')
 GO
 
+/*INSERCION DE DATOS EN TABLAS*/
+
+INSERT INTO PUESTO VALUES
+(1,'Ingeniero de Software',2800,2600),
+(2,'Gerente de Producto',1500,1400),
+(3,'Arquitecto Cloud',2000,1800.0),
+(4,'Desarrollador de Software',1500,1000),
+(5,'Cientifico de Data',2800,2400),
+(6,'Analista de Negocios',1600,980),
+(7,'Ingeniero DevOps',2500,2200),
+(8,'Soporte Tecnico',1200,920.0),
+(9,'Administrador de Red',1600,1200),
+(10,'Desarrollador de Apps Moviles',1900,1500)
+go
+
+INSERT INTO REGION VALUES
+(1,'Norteamerica'),
+(2,'Sudamerica'),
+(3,'Centroamerica'),
+(4,'Europa'),
+(5,'Asia'),
+(6,'Africa'),
+(7,'Oceania')
+go
+
+INSERT INTO PAIS VALUES
+(1,'Estado Unidos',1),
+(2,'Mexico',1),
+(3,'Peru',2),
+(4,'Argentina',2),
+(5,'Italia',4),
+(6,'España',4),
+(7,'China',5),
+(8,'India',5),
+(9,'Egipto',6),
+(10,'Australia',7)
+go
+
+
+
+
 /*
-Probando git. . .
-Modificacion3
+DATOS INSERTADOS EN LA TABLA PUESTO Y EN LA TABLA PAIS
 */
