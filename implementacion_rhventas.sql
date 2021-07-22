@@ -34,14 +34,16 @@ CREATE TABLE PUESTO
 )
 go
 
-ALTER TABLE PUESTO
-ADD PRIMARY KEY (Pk_PuestoId)
-
+DROP TABLE if exists REGION
+go
 CREATE TABLE REGION
 (
 	Pk_Region_Id int not null,
 	Nombre nvarchar(40) not null	
 )
+go
+
+DROP TABLE if exists PAIS
 go
 
 CREATE TABLE PAIS
@@ -52,6 +54,9 @@ CREATE TABLE PAIS
 )
 go
 
+DROP TABLE if exists SUCURSAL
+go
+
 CREATE TABLE SUCURSAL 
 (
 	Pk_SucursalId int not null,
@@ -59,5 +64,34 @@ CREATE TABLE SUCURSAL
 	Distrito nvarchar(20) not null,
 	Provincia nvarchar(40) not null,
 	Fk_Pais_PaisId int not null
+)
+go
+
+DROP TABLE IF EXISTS USUARIO
+go
+
+CREATE TABLE USUARIO
+(
+	Pk_Nombre nvarchar(50) not null,
+	Pass varBinary(8000) not null,
+	Estado char(1) not null,
+	Fk_Empleado_EmpleadoId int not null
+)
+go
+
+DROP TABLE IF EXISTS EMPLEADO
+go
+
+CREATE TABLE EMPLEADO
+(
+	Pk_Empleado_Id int not null,
+	Tipo_Doc_Identidad nvarchar(20) not null,
+	Nro_Doc_Identidad nvarchar(20) not null,
+	Nombre nvarchar(40) not null,
+	Apellido nvarchar(40) not null,
+	Email nvarchar(50) not null,
+	Nacionalidad nvarchar(40) not null,
+	telefono nvarchar(20) not null,
+	FSupervisor_Id int not null
 )
 go
