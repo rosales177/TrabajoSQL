@@ -912,10 +912,8 @@ VALUES (@depa, @nom, @S_D_SuId)
 SET @mensaje = 'Registro Insertado'
 END
 GO
-/*LA SIGUIENTE LINEA ME SALE ERROR LA UNICA*/
-EXECUTE SP_INSERTAR_DEPARTAMENTO '10','HUMBERTO DANILO', '8'
 
-<<<<<<< HEAD
+
 /*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
 
 DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
@@ -953,6 +951,4 @@ as
 	VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
 
 Go
-=======
-select * from DEPARTAMENTO
->>>>>>> 62675e0c2725a712470702510bf4fad6765715bb
+
