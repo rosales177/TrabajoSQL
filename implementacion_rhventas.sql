@@ -1,8 +1,8 @@
 USE master
 go
-
+/*
 DROP DATABASE RH_VENTAS
-go
+go*/
 
 CREATE DATABASE RH_VENTAS
 ON PRIMARY    
@@ -31,9 +31,9 @@ go
 
 USE RH_VENTAS
 GO
-
+/*
 DROP TABLE IF EXISTS PUESTO
-go
+go*/
 CREATE TABLE PUESTO
 (
 	Pk_Puesto_Id int not null identity(1,1),
@@ -42,19 +42,19 @@ CREATE TABLE PUESTO
 	Salario_Minimo decimal(6,2) not null
 )
 go
-
+/*
 DROP TABLE IF EXISTS REGION
-go
+go*/
 CREATE TABLE REGION
 (
 	Pk_Region_Id int not null identity(1,1),
 	Nombre nvarchar(40) not null	
 )
 go
-
+/*
 DROP TABLE IF EXISTS PAIS
 go
-
+*/
 CREATE TABLE PAIS
 (
 	Pk_Pais_Id int not null identity(1,1),
@@ -62,10 +62,10 @@ CREATE TABLE PAIS
 	Fk_Region_Pais_RegionId int not null
 )                        
 go
-
+/*
 DROP TABLE IF EXISTS EMPLEADO
 go
-
+*/
 CREATE TABLE EMPLEADO
 (
 	Pk_Empleado_Id int not null identity(1,1),
@@ -79,9 +79,9 @@ CREATE TABLE EMPLEADO
 	Fk_Empleado_Empleado_SupervisorId int not null
 )
 go
-
+/*
 DROP TABLE IF EXISTS DEPARTAMENTO
-GO
+GO*/
 CREATE TABLE DEPARTAMENTO
 (
 	Pk_Departamento_ID int not null identity(1,1),
@@ -89,9 +89,9 @@ CREATE TABLE DEPARTAMENTO
 	Fk_Sucursal_Departamento_SucursalId int not null
 )
 GO
-
+/*
 DROP TABLE IF EXISTS SUCURSAL
-go
+go*/
 
 
 CREATE TABLE SUCURSAL
@@ -105,9 +105,9 @@ Fk_Pais_Sucursal_PaisId int not null
 go
 
 
-
+/*
 DROP TABLE IF EXISTS USUARIO
-go
+go*/
 
 
 CREATE TABLE USUARIO
@@ -118,9 +118,9 @@ Estado char(1) not null,
 Fk_Empleado_Usuario_EmpleadoId int not null
 )
 go
-
+/*
 DROP TABLE IF EXISTS EMPLEADO_CONTRATOS
-GO
+GO*/
 
 CREATE TABLE EMPLEADO_CONTRATOS
 (
@@ -135,9 +135,9 @@ CREATE TABLE EMPLEADO_CONTRATOS
 
 )
 GO
-
+/*
 DROP TABLE IF EXISTS EMPLEADO_CONTRATO_HISTORIAL
-GO
+GO*/
 CREATE TABLE EMPLEADO_CONTRATO_HISTORIAL
 (
 	Pk_Empleado_Id int not null,
@@ -157,66 +157,66 @@ GO
 
 
 /*---PRIMARY KEY---*/
-
+/*
 ALTER TABLE PUESTO
 DROP CONSTRAINT IF EXISTS Pk_Puesto_Id
-go
+go*/
 ALTER TABLE PUESTO
 ADD PRIMARY KEY (Pk_Puesto_Id)
 go
-
+/*
 ALTER TABLE REGION
 DROP CONSTRAINT IF EXISTS Pk_Region_Id
-go
+go*/
 ALTER TABLE REGION
 ADD PRIMARY KEY (Pk_Region_Id)
 go
-
+/*
 ALTER TABLE PAIS
 DROP CONSTRAINT IF EXISTS Pk_Pais_Id
-go
+go*/
 ALTER TABLE PAIS
 ADD PRIMARY KEY (Pk_Pais_Id)
 go
-
+/*
 ALTER TABLE SUCURSAL
 DROP CONSTRAINT IF EXISTS Pk_Sucursal_Id
-go
+go*/
 ALTER TABLE SUCURSAL
 ADD PRIMARY KEY (Pk_Sucursal_Id)
 go
-
+/*
 ALTER TABLE DEPARTAMENTO
 DROP CONSTRAINT IF EXISTS Pk_Departamento_Id
-go
+go*/
 ALTER TABLE DEPARTAMENTO
 ADD PRIMARY KEY (Pk_Departamento_Id)
 go
-
+/*
 ALTER TABLE USUARIO
 DROP CONSTRAINT IF EXISTS Pk_Nombre
-go
+go*/
 ALTER TABLE USUARIO
 ADD PRIMARY KEY (Pk_Nombre)
 go
-
+/*
 ALTER TABLE EMPLEADO
 DROP CONSTRAINT IF EXISTS Pk_Empleado_Id
-go
+go*/
 ALTER TABLE EMPLEADO
 ADD PRIMARY KEY (Pk_Empleado_Id)
 go
-
+/*
 ALTER TABLE EMPLEADO_CONTRATOS
 DROP CONSTRAINT if exists Pk_Contrato_Id
-go
+go*/
 ALTER TABLE EMPLEADO_CONTRATOS
 ADD PRIMARY KEY (Pk_Contrato_Id)
 go
-
+/*
 ALTER TABLE EMPLEADO_CONTRATO_HISTORIAL
 DROP CONSTRAINT if exists Pk_EmpleadoId_ContratoId
-go
+go*/
 ALTER TABLE EMPLEADO_CONTRATO_HISTORIAL
 ADD CONSTRAINT Pk_EmpleadoId_ContratoId PRIMARY KEY (Pk_Empleado_Id, Pk_Contrato_Id)
 go
@@ -224,82 +224,88 @@ go
 
 
 /*---FOREIGN KEYS---*/
-
+/*
 ALTER TABLE PAIS
 DROP CONSTRAINT IF EXISTS Fk_Region_Pais_RegionId
-go
+go*/
 ALTER TABLE PAIS
 ADD CONSTRAINT Fk_Region_Pais_RegionId FOREIGN KEY(Fk_Region_Pais_RegionId)
 REFERENCES REGION(Pk_Region_Id)
 go
-
+/*
 ALTER TABLE SUCURSAL
 DROP CONSTRAINT IF EXISTS Fk_Pais_Sucursal_PaisId
-go
+go*/
 ALTER TABLE SUCURSAL
 ADD CONSTRAINT Fk_Pais_Sucursal_PaisId FOREIGN KEY(Fk_Pais_Sucursal_PaisId)
 REFERENCES PAIS(Pk_Pais_Id)
 go
-
+/*
 ALTER TABLE DEPARTAMENTO
 DROP CONSTRAINT IF EXISTS Fk_Sucursal_Departamento_SucursalId
-go
+go*/
 ALTER TABLE DEPARTAMENTO
 ADD CONSTRAINT Fk_Sucursal_Deparatamento_SucursalId FOREIGN KEY(Fk_Sucursal_Departamento_SucursalId)
 REFERENCES SUCURSAL(Pk_Sucursal_Id)
 go
 
+
+--=========FK_Empleado_Empleado_SupervisorId da Falla=======
+
+
+/*
 ALTER TABLE EMPLEADO
 DROP CONSTRAINT IF EXISTS Fk_Empleado_Empleado_SupervisorId
 go
 ALTER TABLE EMPLEADO
 ADD CONSTRAINT Fk_Empleado_Empleado_SupervisorId FOREIGN KEY(Fk_Empleado_Empleado_SupervisorId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
-go
-
+go*/
+/*
 ALTER TABLE USUARIO
 DROP CONSTRAINT IF EXISTS Fk_Empleado_Usuario_EmpleadoId
-go
+go*/
 ALTER TABLE USUARIO
 ADD CONSTRAINT Fk_Empleado_Usuario_EmpleadoId FOREIGN KEY(Fk_Empleado_Usuario_EmpleadoId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
 ON DELETE CASCADE	------->  RESTRICCION ELIMINACION EN CASCADA
 go
-
+/*
 ALTER TABLE EMPLEADO_CONTRATOS
 DROP CONSTRAINT if  exists Fk_Empleado_EmpleadoContratos_EmpleadoId
-go
+go*/
 ALTER TABLE EMPLEADO_CONTRATOS
 ADD CONSTRAINT Fk_Empleado_EmpleadoContratos_EmpleadoId FOREIGN KEY(Fk_Empleado_EmpleadoContratos_EmpleadoId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
 go
-
+/*
 ALTER TABLE EMPLEADO_CONTRATOS
 DROP CONSTRAINT if  exists Fk_Departamento_EmpleadoContratos_DepartamentoId
-go
+go*/
 ALTER TABLE EMPLEADO_CONTRATOS
 ADD CONSTRAINT Fk_Departamento_EmpleadoContratos_DepartamentoId FOREIGN KEY(Fk_Departamento_EmpleadoContratos_DepartamentoId)
 REFERENCES DEPARTAMENTO(Pk_Departamento_Id)
 go
 
 /*---UNIQUE KEY---*/
-
+/*
 ALTER TABLE PAIS
 drop constraint IF EXISTS Uk_NombreP
-GO
+GO*/
 ALTER TABLE PAIS
 add constraint Uk_NombreP Unique (Uk_Nombre)
 GO
-
+/*
 ALTER TABLE DEPARTAMENTO
 drop constraint IF EXISTS Uk_Nombre
-GO
+GO*/
 ALTER TABLE DEPARTAMENTO
 add constraint Uk_Nombre Unique (Uk_Nombre)
 GO
+/*
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Uk_Nro_Doc_Identidad
-GO
+GO*/
 ALTER TABLE EMPLEADO
 add constraint Uk_Nro_Doc_Identidad Unique (Uk_Nro_Doc_Identidad)
 GO
@@ -307,24 +313,24 @@ GO
 
 
 /*---ALTER CHECK---*/
-
+/*
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Nro_Doc_Identidad
-GO
+GO*/
 ALTER TABLE EMPLEADO
 add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Nro_Doc_Identidad not like '%[^0-9]%')
 GO
-
+/*
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Email
-GO
+GO*/
 ALTER TABLE EMPLEADO
 add constraint Ck_Email CHECK (Email like '%[^@]@%[^.].[a-z][a-z][a-z]')
 GO
-
+/*
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Telefono
-GO
+GO*/
 ALTER TABLE EMPLEADO
 add constraint Ck_Telefono CHECK (Telefono not like '%[^0-9]%')
 GO
@@ -343,9 +349,9 @@ as
 	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Passwor),@Estado,@EmpleadoId)
 Go
  ----------SELECT WHERE----------------
-
+ /*
 DROP PROC IF EXISTS sp_Select_Usuario
-go
+go*/
 CREATE PROCEDURE sp_Select_Usuario
 @EmpleadoID int
 as
@@ -353,8 +359,8 @@ as
 go
 
 -------------UPDATE-------------------
-DROP PROC IF EXISTS sp_Update_Usuario
-go
+/*DROP PROC IF EXISTS sp_Update_Usuario
+go*/
 CREATE PROC sp_Update_Usuario
 @Nombre nvarchar,
 @Password nvarchar(12),
@@ -370,8 +376,8 @@ as
 GO
 
 -------------DELETE--------------------
-DROP PROC IF EXISTS sp_Delete_Usuario
-go
+/*DROP PROC IF EXISTS sp_Delete_Usuario
+go*/
 CREATE PROC sp_Delete_Usuario
 @EmpleadoID int 
 as
@@ -384,8 +390,8 @@ go
 --======================================
 
 --=========PUESTO========
-drop procedure if exists sp_InsertarPuesto
-go
+/*drop procedure if exists sp_InsertarPuesto
+go*/
 create proc sp_InsertarPuesto
 	@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
 	@resultado nvarchar(50) output
@@ -413,8 +419,8 @@ end
 go
 
 --=========REGION========
-drop procedure if exists sp_InsertarRegion
-go
+/*drop procedure if exists sp_InsertarRegion
+go*/
 create proc sp_InsertarRegion
 	@nom nvarchar(40),
 	@resultado nvarchar(50) output
@@ -432,8 +438,8 @@ end
 go
 
 --=========PAIS========
-drop procedure if exists sp_InsertarPais
-go
+/*drop procedure if exists sp_InsertarPais
+go*/
 create proc sp_InsertarPais
 	@nom nvarchar(40), @reg int,
 	@resultado nvarchar(50) output
@@ -461,9 +467,9 @@ go
 --======================================
 
 --=========PUESTO========
-
+/*
 DROP PROCEDURE if exists sp_SeleccionaPuesto
-go
+go*/
 CREATE PROCEDURE sp_SeleccionaPuesto
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -473,32 +479,8 @@ GO
 
 --=========REGION========
 
-DROP PROCEDURE if exists sp_SeleccionaRegion
+--DROP PROCEDURE if exists sp_SeleccionaRegion
 
-
-INSERT INTO PUESTO VALUES
-('Ingeniero de Software',2800,2600),
-('Gerente de Producto',1500,1400),
-('Arquitecto Cloud',2000,1800.0),
-('Desarrollador de Software',1500,1000),
-('Cientifico de Data',2800,2400),
-('Analista de Negocios',1600,980),
-('Ingeniero DevOps',2500,2200),
-('Soporte Tecnico',1200,920.0),
-('Administrador de Red',1600,1200),
-('Desarrollador de Apps Moviles',1900,1500)
-go
-
-INSERT INTO REGION VALUES
-('Norteamerica'),
-('Sudamerica'),
-('Centroamerica'),
-('Europa'),
-('Asia'),
-('Africa'),
-('Oceania')
-
-go
 CREATE PROCEDURE sp_SeleccionaRegion
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -507,30 +489,14 @@ SET @resultado='Seleccion Exitosa'
 GO
 
 --=========PAIS========
-
-
-INSERT INTO PAIS VALUES
-('Estado Unidos',1),
-('Mexico',1),
-('Peru',2),
-('Argentina',2),
-('Italia',4),
-('España',4),
-('China',5),
-('India',5),
-('Egipto',6),
-('Australia',7)
-go
-
-
 
 --======================================
 ----------- INSERT PROCEDURE
 --======================================
 
 --=========PUESTO========
-drop procedure if exists sp_InsertarPuesto
-go
+/*drop procedure if exists sp_InsertarPuesto
+go*/
 create proc sp_InsertarPuesto
 	@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
 	@resultado nvarchar(50) output
@@ -558,8 +524,8 @@ end
 go
 
 --=========REGION========
-drop procedure if exists sp_InsertarRegion
-go
+/*drop procedure if exists sp_InsertarRegion
+go*/
 create proc sp_InsertarRegion
 	@nom nvarchar(40),
 	@resultado nvarchar(50) output
@@ -577,8 +543,8 @@ end
 go
 
 --=========PAIS========
-drop procedure if exists sp_InsertarPais
-go
+/*drop procedure if exists sp_InsertarPais
+go*/
 create proc sp_InsertarPais
 	@nom nvarchar(40), @reg int,
 	@resultado nvarchar(50) output
@@ -607,8 +573,8 @@ go
 
 --=========PUESTO========
 
-DROP PROCEDURE if exists sp_SeleccionaPuesto
-go
+/*DROP PROCEDURE if exists sp_SeleccionaPuesto
+go*/
 CREATE PROCEDURE sp_SeleccionaPuesto
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -618,8 +584,8 @@ GO
 
 --=========REGION========
 
-DROP PROCEDURE if exists sp_SeleccionaRegion
-go
+/*DROP PROCEDURE if exists sp_SeleccionaRegion
+go*/
 CREATE PROCEDURE sp_SeleccionaRegion
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -629,8 +595,8 @@ GO
 
 --=========PAIS========
 
-DROP PROCEDURE if exists sp_SeleccionaPais
-go
+/*DROP PROCEDURE if exists sp_SeleccionaPais
+go*/
 CREATE PROCEDURE sp_SeleccionaPais
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -643,8 +609,8 @@ GO
 --======================================
 
 --=========PUESTO========
-DROP PROCEDURE if exists sp_UpdatePuesto
-go
+/*DROP PROCEDURE if exists sp_UpdatePuesto
+go*/
 CREATE PROCEDURE sp_UpdatePuesto  
 @id INT, 
 @nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
@@ -680,8 +646,8 @@ begin
 end
 GO
 --=========REGION========
-DROP PROCEDURE if exists sp_UpdateRegion
-go
+/*DROP PROCEDURE if exists sp_UpdateRegion
+go*/
 CREATE PROCEDURE sp_UpdateRegion  
 @id INT, 
 @nom VARCHAR(40),
@@ -700,8 +666,8 @@ begin
 end
 GO
 --=========PAIS========
-DROP PROCEDURE if exists sp_UpdatePais
-go
+/*DROP PROCEDURE if exists sp_UpdatePais
+go*/
 CREATE PROCEDURE sp_UpdatePais  
 @id INT, 
 @nom VARCHAR(40), @reg int,
@@ -731,8 +697,8 @@ GO
 --======================================
 
 --=========PUESTO========
-DROP PROCEDURE if exists sp_DeletePuesto
-go
+/*DROP PROCEDURE if exists sp_DeletePuesto
+go*/
 CREATE PROCEDURE sp_DeletePuesto
 @id INT,
 @resultado nvarchar(50) output
@@ -741,8 +707,8 @@ DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
 --=========REGION========
-DROP PROCEDURE if exists sp_DeleteRegion
-go
+/*DROP PROCEDURE if exists sp_DeleteRegion
+go*/
 CREATE PROCEDURE sp_DeleteRegion
 @id INT,
 @resultado nvarchar(50) output
@@ -751,8 +717,8 @@ DELETE FROM REGION WHERE Pk_Region_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
 --=========PAIS========
-DROP PROCEDURE if exists sp_DeletePais
-go
+/*DROP PROCEDURE if exists sp_DeletePais
+go*/
 CREATE PROCEDURE sp_DeletePais
 @id INT,
 @resultado nvarchar(50) output
@@ -766,8 +732,8 @@ GO
 --======================================
 
 --=========PUESTO========
-DROP PROCEDURE if exists sp_UpdatePuesto
-go
+/*DROP PROCEDURE if exists sp_UpdatePuesto
+go*/
 CREATE PROCEDURE sp_UpdatePuesto  
 @id INT, 
 @nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
@@ -803,8 +769,8 @@ begin
 end
 GO
 --=========REGION========
-DROP PROCEDURE if exists sp_UpdateRegion
-go
+/*DROP PROCEDURE if exists sp_UpdateRegion
+go*/
 CREATE PROCEDURE sp_UpdateRegion  
 @id INT, 
 @nom VARCHAR(40),
@@ -823,8 +789,8 @@ begin
 end
 GO
 --=========PAIS========
-DROP PROCEDURE if exists sp_UpdatePais
-go
+/*DROP PROCEDURE if exists sp_UpdatePais
+go*/
 CREATE PROCEDURE sp_UpdatePais  
 @id INT, 
 @nom VARCHAR(40), @reg int,
@@ -854,8 +820,8 @@ GO
 --======================================
 
 --=========PUESTO========
-DROP PROCEDURE if exists sp_DeletePuesto
-go
+/*DROP PROCEDURE if exists sp_DeletePuesto
+go*/
 CREATE PROCEDURE sp_DeletePuesto
 @id INT,
 @resultado nvarchar(50) output
@@ -864,8 +830,8 @@ DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
 --=========REGION========
-DROP PROCEDURE if exists sp_DeleteRegion
-go
+/*DROP PROCEDURE if exists sp_DeleteRegion
+go*/
 CREATE PROCEDURE sp_DeleteRegion
 @id INT,
 @resultado nvarchar(50) output
@@ -874,8 +840,8 @@ DELETE FROM REGION WHERE Pk_Region_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
 --=========PAIS========
-DROP PROCEDURE if exists sp_DeletePais
-go
+/*DROP PROCEDURE if exists sp_DeletePais
+go*/
 CREATE PROCEDURE sp_DeletePais
 @id INT,
 @resultado nvarchar(50) output
@@ -889,8 +855,8 @@ GO
       INSERT TABLA DEPARTAMENTO
 ------------------------------------------*/
 
-DROP PROC IF EXISTS SP_INSERTAR_DEPARTAMENTOS
-go
+/*DROP PROC IF EXISTS SP_INSERTAR_DEPARTAMENTOS
+go*/
 
 CREATE PROC SP_INSERTAR_DEPARTAMENTOS
 	@depa nvarchar(50), @nom nvarchar(50), @S_D_SuId int, @mensaje nvarchar(80)
@@ -914,8 +880,8 @@ GO
 
 /*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
 
-DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
-go
+/*DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
+go*/
 CREATE TRIGGER INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
 ON EMPLEADO_CONTRATOS
 FOR INSERT
