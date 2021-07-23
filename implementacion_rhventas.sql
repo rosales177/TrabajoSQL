@@ -345,6 +345,7 @@ Go
  ----------SELECT WHERE----------------
 
 DROP PROC IF EXISTS sp_Select_Usuario
+go
 CREATE PROCEDURE sp_Select_Usuario
 @EmpleadoID int
 as
@@ -353,6 +354,7 @@ go
 
 -------------UPDATE-------------------
 DROP PROC IF EXISTS sp_Update_Usuario
+go
 CREATE PROC sp_Update_Usuario
 @Nombre nvarchar,
 @Password nvarchar(12),
@@ -365,11 +367,11 @@ as
 	SET Pk_Nombre = @Nombre, Pass = ENCRYPTBYPASSPHRASE(@frase,@Password),Estado=@Estado 
 	WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadorID
 
-<<<<<<< HEAD
 GO
 
 -------------DELETE--------------------
 DROP PROC IF EXISTS sp_Delete_Usuario
+go
 CREATE PROC sp_Delete_Usuario
 @EmpleadoID int 
 as
@@ -472,7 +474,8 @@ GO
 --=========REGION========
 
 DROP PROCEDURE if exists sp_SeleccionaRegion
-=======
+
+
 INSERT INTO PUESTO VALUES
 ('Ingeniero de Software',2800,2600),
 ('Gerente de Producto',1500,1400),
@@ -494,7 +497,7 @@ INSERT INTO REGION VALUES
 ('Asia'),
 ('Africa'),
 ('Oceania')
->>>>>>> 62675e0c2725a712470702510bf4fad6765715bb
+
 go
 CREATE PROCEDURE sp_SeleccionaRegion
 @id INT, @resultado nvarchar(50) output
@@ -505,8 +508,7 @@ GO
 
 --=========PAIS========
 
-<<<<<<< HEAD
-=======
+
 INSERT INTO PAIS VALUES
 ('Estado Unidos',1),
 ('Mexico',1),
@@ -627,7 +629,6 @@ GO
 
 --=========PAIS========
 
->>>>>>> 62675e0c2725a712470702510bf4fad6765715bb
 DROP PROCEDURE if exists sp_SeleccionaPais
 go
 CREATE PROCEDURE sp_SeleccionaPais
@@ -636,7 +637,6 @@ AS
 SELECT * FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Seleccion Exitosa'
 GO
-<<<<<<< HEAD
 
 --======================================
 --======== UPDATE PROCEDURE
@@ -760,7 +760,6 @@ AS
 DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
-=======
 
 --======================================
 --======== UPDATE PROCEDURE
@@ -853,7 +852,6 @@ GO
 --======================================
 --------- DELETE PROCEDURE
 --======================================
->>>>>>> 62675e0c2725a712470702510bf4fad6765715bb
 
 --=========PUESTO========
 DROP PROCEDURE if exists sp_DeletePuesto
@@ -917,6 +915,7 @@ GO
 /*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
 
 DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
+go
 CREATE TRIGGER INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
 ON EMPLEADO_CONTRATOS
 FOR INSERT
@@ -951,4 +950,6 @@ as
 	VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
 
 Go
+
+--------------push prueba------------------------
 
