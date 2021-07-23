@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS PUESTO
 go
 CREATE TABLE PUESTO
 (
-	Pk_Puesto_Id int not null,
+	Pk_Puesto_Id int not null identity(1,1),
 	Nombre nvarchar(40) not null,
 	Salario_Maximo decimal(6,2) not null,
 	Salario_Minimo decimal(6,2) not null
@@ -47,7 +47,7 @@ DROP TABLE IF EXISTS REGION
 go
 CREATE TABLE REGION
 (
-	Pk_Region_Id int not null,
+	Pk_Region_Id int not null identity(1,1),
 	Nombre nvarchar(40) not null	
 )
 go
@@ -57,7 +57,7 @@ go
 
 CREATE TABLE PAIS
 (
-	Pk_Pais_Id int not null,
+	Pk_Pais_Id int not null identity(1,1),
 	Uk_Nombre nvarchar(40) not null,
 	Fk_Region_Pais_RegionId int not null
 )                        
@@ -68,7 +68,7 @@ go
 
 CREATE TABLE EMPLEADO
 (
-	Pk_Empleado_Id int not null,
+	Pk_Empleado_Id int not null identity(1,1),
 	Tipo_Doc_Identidad nvarchar(20) not null,
 	Uk_Nro_Doc_Identidad nvarchar(20) not null,
 	Nombre nvarchar(40) not null,
@@ -84,7 +84,7 @@ DROP TABLE IF EXISTS DEPARTAMENTO
 GO
 CREATE TABLE DEPARTAMENTO
 (
-	Pk_Departamento_ID int not null,
+	Pk_Departamento_ID int not null identity(1,1),
 	Uk_Nombre nvarchar(40) not null,
 	Fk_Sucursal_Departamento_SucursalId int not null
 )
@@ -96,7 +96,7 @@ go
 
 CREATE TABLE SUCURSAL
 (
-Pk_Sucursal_Id int not null,
+Pk_Sucursal_Id int not null identity(1,1),
 Direccion nvarchar(60) not null,
 Distrito nvarchar(20) not null,
 Provincia nvarchar(40) not null,
@@ -124,7 +124,7 @@ GO
 
 CREATE TABLE EMPLEADO_CONTRATOS
 (
-	Pk_Contrato_Id int not null,
+	Pk_Contrato_Id int not null identity(1,1),
 	Fk_Empleado_EmpleadoContratos_EmpleadoId int not null,
 	Fecha_Inicio date not null,
 	Fecha_Termino date not null,
@@ -329,47 +329,325 @@ ALTER TABLE EMPLEADO
 add constraint Ck_Telefono CHECK (Telefono not like '%[^0-9]%')
 GO
 
-/*INSERCION DE DATOS EN TABLAS*/
+/*Creacion de CRUD tabla USUARIO*/
 
-INSERT INTO PUESTO VALUES
-(1,'Ingeniero de Software',2800,2600),
-(2,'Gerente de Producto',1500,1400),
-(3,'Arquitecto Cloud',2000,1800.0),
-(4,'Desarrollador de Software',1500,1000),
-(5,'Cientifico de Data',2800,2400),
-(6,'Analista de Negocios',1600,980),
-(7,'Ingeniero DevOps',2500,2200),
-(8,'Soporte Tecnico',1200,920.0),
-(9,'Administrador de Red',1600,1200),
-(10,'Desarrollador de Apps Moviles',1900,1500)
+----------INSERT------------------
+CREATE PROCEDURE sp_insert_Usuario
+@Nombre nvarchar(50),
+@Passwor nvarchar(12),
+@Estado char(1),
+@EmpleadoId int 
+as	
+	Declare @frase nvarchar(20);
+	Set @frase = 'EstaEsMiFrace'
+	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Passwor),@Estado,@EmpleadoId)
+Go
+ ----------SELECT WHERE----------------
+
+DROP PROC IF EXISTS sp_Select_Usuario
+CREATE PROCEDURE sp_Select_Usuario
+@EmpleadoID int
+as
+	SELECT * FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = 'EmpleadoID' 
 go
 
-INSERT INTO REGION VALUES
-(1,'Norteamerica'),
-(2,'Sudamerica'),
-(3,'Centroamerica'),
-(4,'Europa'),
-(5,'Asia'),
-(6,'Africa'),
-(7,'Oceania')
+-------------UPDATE-------------------
+DROP PROC IF EXISTS sp_Update_Usuario
+CREATE PROC sp_Update_Usuario
+@Nombre nvarchar,
+@Password nvarchar(12),
+@Estado char(1),
+@EmpleadorID int
+as
+	Declare @frase nvarchar(20);
+	Set @frase = 'EstaEsMiFrace'
+	UPDATE USUARIO 
+	SET Pk_Nombre = @Nombre, Pass = ENCRYPTBYPASSPHRASE(@frase,@Password),Estado=@Estado 
+	WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadorID
+
+GO
+
+-------------DELETE--------------------
+DROP PROC IF EXISTS sp_Delete_Usuario
+CREATE PROC sp_Delete_Usuario
+@EmpleadoID int 
+as
+	DELETE FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID
 go
 
-INSERT INTO PAIS VALUES
-(1,'Estado Unidos',1),
-(2,'Mexico',1),
-(3,'Peru',2),
-(4,'Argentina',2),
-(5,'Italia',4),
-(6,'España',4),
-(7,'China',5),
-(8,'India',5),
-(9,'Egipto',6),
-(10,'Australia',7)
+
+--======================================
+----------- INSERT PROCEDURE
+--======================================
+
+--=========PUESTO========
+drop procedure if exists sp_InsertarPuesto
+go
+create proc sp_InsertarPuesto
+	@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
+	@resultado nvarchar(50) output
+as
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @smax is null or len(@smax)=0 or len(@smax)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	if @smin is null or len(@smin)=0 or len(@smin)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	insert PUESTO(Nombre, Salario_Maximo, Salario_Minimo)
+	values(@nom, @smax, @smin)
+	set @resultado='Registro Insertado'
+end
+go
+
+--=========REGION========
+drop procedure if exists sp_InsertarRegion
+go
+create proc sp_InsertarRegion
+	@nom nvarchar(40),
+	@resultado nvarchar(50) output
+as
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	insert REGION(Nombre)
+	values(@nom)
+	set @resultado='Registro Insertado'
+end
+go
+
+--=========PAIS========
+drop procedure if exists sp_InsertarPais
+go
+create proc sp_InsertarPais
+	@nom nvarchar(40), @reg int,
+	@resultado nvarchar(50) output
+as
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @reg is null or LEN(@reg)=0
+	begin
+		set @resultado='El codigo de region ingresado no es valido'
+		return
+	end
+	insert PAIS(Uk_Nombre,Fk_Region_Pais_RegionId)
+	values(@nom,@reg)
+	set @resultado='Registro Insertado'
+end
 go
 
 
+--======================================
+--======== SELECT PROCEDURE
+--======================================
+
+--=========PUESTO========
+
+DROP PROCEDURE if exists sp_SeleccionaPuesto
+go
+CREATE PROCEDURE sp_SeleccionaPuesto
+@id INT, @resultado nvarchar(50) output
+AS 
+SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+--=========REGION========
+
+DROP PROCEDURE if exists sp_SeleccionaRegion
+go
+CREATE PROCEDURE sp_SeleccionaRegion
+@id INT, @resultado nvarchar(50) output
+AS 
+SELECT * FROM REGION WHERE Pk_Region_Id = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+--=========PAIS========
+
+DROP PROCEDURE if exists sp_SeleccionaPais
+go
+CREATE PROCEDURE sp_SeleccionaPais
+@id INT, @resultado nvarchar(50) output
+AS 
+SELECT * FROM PAIS WHERE Pk_Pais_Id = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+--======================================
+--======== UPDATE PROCEDURE
+--======================================
+
+--=========PUESTO========
+DROP PROCEDURE if exists sp_UpdatePuesto
+go
+CREATE PROCEDURE sp_UpdatePuesto  
+@id INT, 
+@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
+@resultado nvarchar(50) output
+AS
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @smax is null or len(@smax)=0 or len(@smax)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	if @smin is null or len(@smin)=0 or len(@smin)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	UPDATE PUESTO SET  
+       [Nombre] = @nom,
+       [Salario_Maximo] = @smax,
+	   [Salario_Minimo] = @smin
+       WHERE Pk_Puesto_Id= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+--=========REGION========
+DROP PROCEDURE if exists sp_UpdateRegion
+go
+CREATE PROCEDURE sp_UpdateRegion  
+@id INT, 
+@nom VARCHAR(40),
+@resultado nvarchar(50) output
+AS
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	UPDATE REGION SET  
+       [Nombre] = @nom
+       WHERE Pk_Region_Id= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+--=========PAIS========
+DROP PROCEDURE if exists sp_UpdatePais
+go
+CREATE PROCEDURE sp_UpdatePais  
+@id INT, 
+@nom VARCHAR(40), @reg int,
+@resultado nvarchar(50) output
+AS
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @reg is null or LEN(@reg)=0
+	begin
+		set @resultado='El codigo de region ingresado no es valido'
+		return
+	end
+	UPDATE PAIS SET  
+       [Uk_Nombre] = @nom,
+	   [Fk_Region_Pais_RegionId]= @reg
+       WHERE Pk_Pais_Id= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+
+--======================================
+--------- DELETE PROCEDURE
+--======================================
+
+--=========PUESTO========
+DROP PROCEDURE if exists sp_DeletePuesto
+go
+CREATE PROCEDURE sp_DeletePuesto
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
+SET @resultado='Eliminacion Exitosa'
+GO
+--=========REGION========
+DROP PROCEDURE if exists sp_DeleteRegion
+go
+CREATE PROCEDURE sp_DeleteRegion
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM REGION WHERE Pk_Region_Id = @id
+SET @resultado='Eliminacion Exitosa'
+GO
+--=========PAIS========
+DROP PROCEDURE if exists sp_DeletePais
+go
+CREATE PROCEDURE sp_DeletePais
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM PAIS WHERE Pk_Pais_Id = @id
+SET @resultado='Eliminacion Exitosa'
+GO
 
 
-/*
-DATOS INSERTADOS EN LA TABLA PUESTO Y EN LA TABLA PAIS
-*/
+/*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
+
+DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
+CREATE TRIGGER INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
+ON EMPLEADO_CONTRATOS
+FOR INSERT
+as
+	DECLARE @ContratoID int
+	DECLARE @EmpleadoID int
+	DECLARE @fechaI date
+	DECLARE @fechaF date
+	DECLARE @SueldoB decimal(8,2)
+	DECLARE @Comisionvta decimal(8,2)
+	DECLARE @PuestoID int
+	DECLARE @DepartamentoID int
+	DECLARE @Años int
+	DECLARE @Meses int
+	DECLARE @Dias int
+
+	SET @ContratoID  = (SELECT Pk_Contrato_Id FROM Inserted)
+	SET @EmpleadoID = (SELECT Fk_Empleado_EmpleadoContratos_EmpleadoId FROM Inserted)
+	SET @fechaI = (SELECT Fecha_Inicio FROM Inserted)
+	SET @fechaF = (SELECT Fecha_Termino FROM Inserted)
+	SET @SueldoB = (SELECT Sueldo_Basico FROM Inserted)
+	SET @Comisionvta = (SELECT Comision_vta FROM Inserted)
+	SET @PuestoID = (SELECT Fk_Puesto_EmpleadoContratos_PuestoId FROM Inserted)
+	SET @DepartamentoID = (SELECT Fk_Departamento_EmpleadoContratos_DepartamentoId FROM Inserted)
+	
+	SET @Años = (SELECT DATEDIFF(YEAR,@fechaI,@fechaF))
+	SET @Meses = (SELECT DATEDIFF(MONTH,@fechaI,@fechaF))
+	SET @Dias = (SELECT DATEDIFF(DAY,@fechaI,@fechaF))
+
+
+	INSERT INTO EMPLEADO_CONTRATO_HISTORIAL 
+	VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
+
+Go
