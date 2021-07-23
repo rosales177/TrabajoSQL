@@ -606,3 +606,33 @@ DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
 
+
+/*----------------------------------------
+      INSERT TABLA DEPARTAMENTO
+------------------------------------------*/
+
+DROP PROC IF EXISTS SP_INSERTAR_DEPARTAMENTOS
+go
+
+CREATE PROC SP_INSERTAR_DEPARTAMENTOS
+	@depa nvarchar(50), @nom nvarchar(50), @S_D_SuId int, @mensaje nvarchar(80)
+
+AS
+BEGIN
+
+IF @depa is null or count(@depa)< 10 or count(@depa)>10
+BEGIN
+SET @mensaje ='¡Id Departamento invalido! Id 10 digitos'
+RETURN
+END
+
+
+INSERT into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
+VALUES (@depa, @nom, @S_D_SuId)
+SET @mensaje = 'Registro Insertado'
+END
+GO
+/*LA SIGUIENTE LINEA ME SALE ERROR LA UNICA*/
+EXECUTE SP_INSERTAR_DEPARTAMENTO '10','HUMBERTO DANILO', '8'
+
+select * from DEPARTAMENTO
