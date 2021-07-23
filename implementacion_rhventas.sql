@@ -331,8 +331,6 @@ GO
 
 /*INSERCION DE DATOS EN TABLAS*/
 
-
-
 INSERT INTO PUESTO VALUES
 ('Ingeniero de Software',2800,2600),
 ('Gerente de Producto',1500,1400),
@@ -371,32 +369,240 @@ go
 
 
 
+--======================================
+----------- INSERT PROCEDURE
+--======================================
 
-/*
-DATOS INSERTADOS EN LA TABLA PUESTO Y EN LA TABLA PAIS
-*/
+--=========PUESTO========
+drop procedure if exists sp_InsertarPuesto
+go
+create proc sp_InsertarPuesto
+	@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
+	@resultado nvarchar(50) output
+as
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @smax is null or len(@smax)=0 or len(@smax)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	if @smin is null or len(@smin)=0 or len(@smin)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	insert PUESTO(Nombre, Salario_Maximo, Salario_Minimo)
+	values(@nom, @smax, @smin)
+	set @resultado='Registro Insertado'
+end
+go
+
+--=========REGION========
+drop procedure if exists sp_InsertarRegion
+go
+create proc sp_InsertarRegion
+	@nom nvarchar(40),
+	@resultado nvarchar(50) output
+as
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	insert REGION(Nombre)
+	values(@nom)
+	set @resultado='Registro Insertado'
+end
+go
+
+--=========PAIS========
+drop procedure if exists sp_InsertarPais
+go
+create proc sp_InsertarPais
+	@nom nvarchar(40), @reg int,
+	@resultado nvarchar(50) output
+as
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @reg is null or LEN(@reg)=0
+	begin
+		set @resultado='El codigo de region ingresado no es valido'
+		return
+	end
+	insert PAIS(Uk_Nombre,Fk_Region_Pais_RegionId)
+	values(@nom,@reg)
+	set @resultado='Registro Insertado'
+end
+go
 
 
+--======================================
+--======== SELECT PROCEDURE
+--======================================
 
-/*POSIBLE crud de Procedimientp Almacenado*/
+--=========PUESTO========
 
-CREATE PROCEDURE CRUD_RH_VENTAS
-	/*VARIABLES O COLUMNAS DE UNA TABLA*/
-	@MODO CHAR(1)
+DROP PROCEDURE if exists sp_SeleccionaPuesto
+go
+CREATE PROCEDURE sp_SeleccionaPuesto
+@id INT, @resultado nvarchar(50) output
+AS 
+SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+--=========REGION========
+
+DROP PROCEDURE if exists sp_SeleccionaRegion
+go
+CREATE PROCEDURE sp_SeleccionaRegion
+@id INT, @resultado nvarchar(50) output
+AS 
+SELECT * FROM REGION WHERE Pk_Region_Id = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+--=========PAIS========
+
+DROP PROCEDURE if exists sp_SeleccionaPais
+go
+CREATE PROCEDURE sp_SeleccionaPais
+@id INT, @resultado nvarchar(50) output
+AS 
+SELECT * FROM PAIS WHERE Pk_Pais_Id = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+--======================================
+--======== UPDATE PROCEDURE
+--======================================
+
+--=========PUESTO========
+DROP PROCEDURE if exists sp_UpdatePuesto
+go
+CREATE PROCEDURE sp_UpdatePuesto  
+@id INT, 
+@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
+@resultado nvarchar(50) output
 AS
-	IF @MODO='I' 
-	BEGIN
-		INSERT INTO /*TABLA*/ VALUES(/*VARIABLES A INSERTAR*/)
-	END
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @smax is null or len(@smax)=0 or len(@smax)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	if @smin is null or len(@smin)=0 or len(@smin)=0
+		begin
+		set @resultado = 'El monto es invalido'
+		return 
+	end
+	UPDATE PUESTO SET  
+       [Nombre] = @nom,
+       [Salario_Maximo] = @smax,
+	   [Salario_Minimo] = @smin
+       WHERE Pk_Puesto_Id= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+--=========REGION========
+DROP PROCEDURE if exists sp_UpdateRegion
+go
+CREATE PROCEDURE sp_UpdateRegion  
+@id INT, 
+@nom VARCHAR(40),
+@resultado nvarchar(50) output
+AS
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	UPDATE REGION SET  
+       [Nombre] = @nom
+       WHERE Pk_Region_Id= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+--=========PAIS========
+DROP PROCEDURE if exists sp_UpdatePais
+go
+CREATE PROCEDURE sp_UpdatePais  
+@id INT, 
+@nom VARCHAR(40), @reg int,
+@resultado nvarchar(50) output
+AS
+begin
+	if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	if @reg is null or LEN(@reg)=0
+	begin
+		set @resultado='El codigo de region ingresado no es valido'
+		return
+	end
+	UPDATE PAIS SET  
+       [Uk_Nombre] = @nom,
+	   [Fk_Region_Pais_RegionId]= @reg
+       WHERE Pk_Pais_Id= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
 
-	IF @MODO='U'
-	BEGIN
-		UPDATE /*TABLA*/ SET(/*VARIABLES A ACTUALIZAR*/)
-	END
+--======================================
+--------- DELETE PROCEDURE
+--======================================
 
-	IF @MODO='D'
-	BEGIN
-		DELETE FROM /*TABLA*/ WHERE (/*VARIABLES A BORRAR*/)
-	END
+--=========PUESTO========
+DROP PROCEDURE if exists sp_DeletePuesto
+go
+CREATE PROCEDURE sp_DeletePuesto
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
+SET @resultado='Eliminacion Exitosa'
+GO
+--=========REGION========
+DROP PROCEDURE if exists sp_DeleteRegion
+go
+CREATE PROCEDURE sp_DeleteRegion
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM REGION WHERE Pk_Region_Id = @id
+SET @resultado='Eliminacion Exitosa'
+GO
+--=========PAIS========
+DROP PROCEDURE if exists sp_DeletePais
+go
+CREATE PROCEDURE sp_DeletePais
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM PAIS WHERE Pk_Pais_Id = @id
+SET @resultado='Eliminacion Exitosa'
+GO
 
-	EXECUTE CRUD_RH_VENTAS @MODO='MODO' 'VALORES A I, A, D'
