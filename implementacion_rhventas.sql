@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS PUESTO
 go
 CREATE TABLE PUESTO
 (
-	Pk_Puesto_Id int not null,
+	Pk_Puesto_Id int not null identity(1,1),
 	Nombre nvarchar(40) not null,
 	Salario_Maximo decimal(6,2) not null,
 	Salario_Minimo decimal(6,2) not null
@@ -47,7 +47,7 @@ DROP TABLE IF EXISTS REGION
 go
 CREATE TABLE REGION
 (
-	Pk_Region_Id int not null,
+	Pk_Region_Id int not null identity(1,1),
 	Nombre nvarchar(40) not null	
 )
 go
@@ -57,7 +57,7 @@ go
 
 CREATE TABLE PAIS
 (
-	Pk_Pais_Id int not null,
+	Pk_Pais_Id int not null identity(1,1),
 	Uk_Nombre nvarchar(40) not null,
 	Fk_Region_Pais_RegionId int not null
 )                        
@@ -68,7 +68,7 @@ go
 
 CREATE TABLE EMPLEADO
 (
-	Pk_Empleado_Id int not null,
+	Pk_Empleado_Id int not null identity(1,1),
 	Tipo_Doc_Identidad nvarchar(20) not null,
 	Uk_Nro_Doc_Identidad nvarchar(20) not null,
 	Nombre nvarchar(40) not null,
@@ -84,7 +84,7 @@ DROP TABLE IF EXISTS DEPARTAMENTO
 GO
 CREATE TABLE DEPARTAMENTO
 (
-	Pk_Departamento_ID int not null,
+	Pk_Departamento_ID int not null identity(1,1),
 	Uk_Nombre nvarchar(40) not null,
 	Fk_Sucursal_Departamento_SucursalId int not null
 )
@@ -96,7 +96,7 @@ go
 
 CREATE TABLE SUCURSAL
 (
-Pk_Sucursal_Id int not null,
+Pk_Sucursal_Id int not null identity(1,1),
 Direccion nvarchar(60) not null,
 Distrito nvarchar(20) not null,
 Provincia nvarchar(40) not null,
@@ -124,7 +124,7 @@ GO
 
 CREATE TABLE EMPLEADO_CONTRATOS
 (
-	Pk_Contrato_Id int not null,
+	Pk_Contrato_Id int not null identity(1,1),
 	Fk_Empleado_EmpleadoContratos_EmpleadoId int not null,
 	Fecha_Inicio date not null,
 	Fecha_Termino date not null,
@@ -331,40 +331,42 @@ GO
 
 /*INSERCION DE DATOS EN TABLAS*/
 
+
+
 INSERT INTO PUESTO VALUES
-(1,'Ingeniero de Software',2800,2600),
-(2,'Gerente de Producto',1500,1400),
-(3,'Arquitecto Cloud',2000,1800.0),
-(4,'Desarrollador de Software',1500,1000),
-(5,'Cientifico de Data',2800,2400),
-(6,'Analista de Negocios',1600,980),
-(7,'Ingeniero DevOps',2500,2200),
-(8,'Soporte Tecnico',1200,920.0),
-(9,'Administrador de Red',1600,1200),
-(10,'Desarrollador de Apps Moviles',1900,1500)
+('Ingeniero de Software',2800,2600),
+('Gerente de Producto',1500,1400),
+('Arquitecto Cloud',2000,1800.0),
+('Desarrollador de Software',1500,1000),
+('Cientifico de Data',2800,2400),
+('Analista de Negocios',1600,980),
+('Ingeniero DevOps',2500,2200),
+('Soporte Tecnico',1200,920.0),
+('Administrador de Red',1600,1200),
+('Desarrollador de Apps Moviles',1900,1500)
 go
 
 INSERT INTO REGION VALUES
-(1,'Norteamerica'),
-(2,'Sudamerica'),
-(3,'Centroamerica'),
-(4,'Europa'),
-(5,'Asia'),
-(6,'Africa'),
-(7,'Oceania')
+('Norteamerica'),
+('Sudamerica'),
+('Centroamerica'),
+('Europa'),
+('Asia'),
+('Africa'),
+('Oceania')
 go
 
 INSERT INTO PAIS VALUES
-(1,'Estado Unidos',1),
-(2,'Mexico',1),
-(3,'Peru',2),
-(4,'Argentina',2),
-(5,'Italia',4),
-(6,'España',4),
-(7,'China',5),
-(8,'India',5),
-(9,'Egipto',6),
-(10,'Australia',7)
+('Estado Unidos',1),
+('Mexico',1),
+('Peru',2),
+('Argentina',2),
+('Italia',4),
+('España',4),
+('China',5),
+('India',5),
+('Egipto',6),
+('Australia',7)
 go
 
 
