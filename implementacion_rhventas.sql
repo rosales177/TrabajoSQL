@@ -313,17 +313,15 @@ GO
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Nro_Doc_Identidad
 GO
+
 ALTER TABLE EMPLEADO
-DROP CONSTRAINT Ck_Nro_Doc_Identidad;
-ALTER TABLE EMPLEADO
-add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Nro_Doc_Identidad like '%[^0-9]%')
+add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Nro_Doc_Identidad not like  '%[^0-9]%')
 GO
 
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Email
 GO
-ALTER TABLE EMPLEADO
-DROP  CONSTRAINT Ck_Email
+
 ALTER TABLE EMPLEADO
 add constraint Ck_Email CHECK (Email like '%[^@]@%[^.].[a-z][a-z][a-z]')
 GO
@@ -331,8 +329,7 @@ GO
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Telefono
 GO
-ALTER TABLE EMPLEADO
-DROP CONSTRAINT Ck_Telefono
+
 ALTER TABLE EMPLEADO
 add constraint Ck_Telefono CHECK (telefono like '%[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]%')
 GO
@@ -514,18 +511,19 @@ GO
 DROP PROCEDURE if exists sp_SelecionaDepartamento
 go
 CREATE PROCEDURE sp_SeleccionaDepartamento
-@id int, resultado nvarchar(50) output
+@id int, @resultado nvarchar(50) output
 AS
 BEGIN
 SELECT * FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
 SET @resultado='Seleccion Exitosa'
+END
 GO
 
 
 --=========REGION========
 
 DROP PROCEDURE if exists sp_SeleccionaRegion
-
+GO
 CREATE PROCEDURE sp_SeleccionaRegion
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -592,8 +590,8 @@ if @nom is null or LEN(@nom)=0
 		return
 	end
 	UPDATE DEPARTAMENTO SET  
-       [Uk_Nombre] = @nom
-	   [Fk_Sucursal_Departamento_SucursalId]=@S_D_SUID
+       [Uk_Nombre] = @nom,
+	   [Fk_Sucursal_Departamento_SucursalId] = @S_D_SUID
        WHERE Pk_Departamento_ID= @id
 	   SET @resultado='Actualizacion Exitosa'
 end
@@ -754,10 +752,11 @@ VALUES
 ('Sur America')
 GO
 
+
 INSERT 
 INTO PAIS
 VALUES
-('PERU',2)
+('PERU',1)
 GO
 
 INSERT 
@@ -775,5 +774,10 @@ GO
 INSERT 
 INTO EMPLEADO
 VALUES
-(1,'DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138')
+('DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138')
 GO
+
+insert into EMPLEADO_CONTRATOS
+values(1,'22-07-2021', '22-08-2022', 950, 500, 1, 1)
+go
+
