@@ -115,6 +115,27 @@ Fk_Empleado_Usuario_EmpleadoId int not null
 )
 go
 
+--================================================
+--			TABLA EMPLEADO_HISTORIAL
+--=================================================
+
+DROP TABLE IF EXISTS EMPLEADO_HISTORIAL
+go
+CREATE TABLE EMPLEADO_HISTORIAL
+(
+	Pk_Historial_Id int not null identity(1,1),
+	Empleado_Id int not null,
+	Tipo_Doc_Identidad nvarchar(20) not null,
+	Nro_Doc_Identidad nvarchar(20) not null,
+	Nombre nvarchar(40) not null,
+	Apellido nvarchar(40) not null,
+	Email nvarchar(50) not null,
+	Nacionalidad nvarchar(40) not null,
+	telefono nvarchar(20) not null,
+	Fecha_Registro_Despido date default getdate() not null,
+)
+go
+
 DROP TABLE IF EXISTS EMPLEADO_CONTRATOS
 GO
 
@@ -694,6 +715,19 @@ DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
 
+/*---TRIGGER DE INSERCION EMPLEADO_HISTORIAL AL ELIMINAR (MATOS)---*/
+
+DROP TRIGGER IF EXISTS INSERTAR_EMPLEADO_HISTORIAL
+go
+CREATE TRIGGER INSERTAR_EMPLEADO_HISTORIAL
+ON EMPLEADO
+FOR DELETE
+as
+	INSERT INTO EMPLEADO_HISTORIAL(Empleado_Id, Tipo_Doc_Identidad, Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono)
+	SELECT 
+	Pk_Empleado_Id, Tipo_Doc_Identidad, Uk_Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono
+	FROM DELETED
+Go
 
 /*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
 
