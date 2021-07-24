@@ -420,6 +420,37 @@ begin
 end
 go
 
+--=========DEPARTAMENTO========
+drop proc if exists sp_insertardepartamento
+go
+create proc sp_insertardepartamento
+	@depa nvarchar(50), @nom nvarchar(50), 
+	@S_D_SuId int, @resultado nvarchar(80)
+as
+begin
+if @depa is null or len(@depa)< 10 or len(@depa)>10
+	begin
+	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
+	return
+end
+if @nom is null or len(@nom)=0
+	begin
+	set @resultado='El nombre ingresado no es valido'
+	return
+end
+if @depa is null or len(@S_D_Suid)< 10 or len(@S_D_Suid)>10
+	begin
+	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
+	return
+end
+
+insert into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
+values (@depa, @nom, @S_D_SuId)
+set @resultado = 'Registro Insertado'
+end
+go
+
+
 --=========REGION========
 drop procedure if exists sp_InsertarRegion
 go
@@ -478,6 +509,19 @@ SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Seleccion Exitosa'
 GO
 
+--=======DEPARTAMENTO=========
+
+DROP PROCEDURE if exists sp_SelecionaDepartamento
+go
+CREATE PROCEDURE sp_SeleccionaDepartamento
+@id int, resultado nvarchar(50) output
+AS
+BEGIN
+SELECT * FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
+SET @resultado='Seleccion Exitosa'
+GO
+
+
 --=========REGION========
 
 DROP PROCEDURE if exists sp_SeleccionaRegion
@@ -530,6 +574,32 @@ begin
 	   SET @resultado='Actualizacion Exitosa'
 end
 GO
+
+--=======DEPARTAMENTO========
+
+DROP PROCEDURE IF exists sp_UpdateDepartamento
+go
+CREATE PROCEDURE sp_UpdateDepartamento
+@id int, 
+@nom nvarchar(50), 
+@S_D_SUID int,
+@resultado nvarchar(50) output
+AS
+BEGIN
+if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	UPDATE DEPARTAMENTO SET  
+       [Uk_Nombre] = @nom
+	   [Fk_Sucursal_Departamento_SucursalId]=@S_D_SUID
+       WHERE Pk_Departamento_ID= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+
+
 --=========REGION========
 DROP PROCEDURE if exists sp_UpdateRegion
 go
@@ -591,6 +661,20 @@ AS
 DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
+
+--=====DEPARTAMENTO========
+
+DROP PROCEDURE IF EXISTS sp_deleteDepartamento
+go
+ CREATE PROCEDURE sp_deleteDepartamento
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
+SET @resultado='Eliminacion Exitosa'
+GO
+
+
 --=========REGION========
 DROP PROCEDURE if exists sp_DeleteRegion
 go
@@ -610,32 +694,6 @@ CREATE PROCEDURE sp_DeletePais
 AS 
 DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
-GO
-
-/*----------------------------------------
-      INSERT TABLA DEPARTAMENTO
-------------------------------------------*/
-
-DROP PROC IF EXISTS SP_INSERTAR_DEPARTAMENTOS
-go
-
-CREATE PROC SP_INSERTAR_DEPARTAMENTOS
-	@depa nvarchar(50), @nom nvarchar(50), @S_D_SuId int, @mensaje nvarchar(80)
-
-AS
-BEGIN
-
-IF @depa is null or count(@depa)< 10 or count(@depa)>10
-BEGIN
-SET @mensaje ='¡Id Departamento invalido! Id 10 digitos'
-RETURN
-END
-
-
-INSERT into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
-VALUES (@depa, @nom, @S_D_SuId)
-SET @mensaje = 'Registro Insertado'
-END
 GO
 
 
