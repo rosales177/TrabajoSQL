@@ -115,6 +115,27 @@ Fk_Empleado_Usuario_EmpleadoId int not null
 )
 go
 
+--================================================
+--			TABLA EMPLEADO_HISTORIAL
+--=================================================
+
+DROP TABLE IF EXISTS EMPLEADO_HISTORIAL
+go
+CREATE TABLE EMPLEADO_HISTORIAL
+(
+	Pk_Historial_Id int not null identity(1,1),
+	Empleado_Id int not null,
+	Tipo_Doc_Identidad nvarchar(20) not null,
+	Nro_Doc_Identidad nvarchar(20) not null,
+	Nombre nvarchar(40) not null,
+	Apellido nvarchar(40) not null,
+	Email nvarchar(50) not null,
+	Nacionalidad nvarchar(40) not null,
+	telefono nvarchar(20) not null,
+	Fecha_Registro_Despido date default getdate() not null,
+)
+go
+
 DROP TABLE IF EXISTS EMPLEADO_CONTRATOS
 GO
 
@@ -313,17 +334,15 @@ GO
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Nro_Doc_Identidad
 GO
+
 ALTER TABLE EMPLEADO
-DROP CONSTRAINT Ck_Nro_Doc_Identidad;
-ALTER TABLE EMPLEADO
-add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Nro_Doc_Identidad like '%[^0-9]%')
+add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Nro_Doc_Identidad not like  '%[^0-9]%')
 GO
 
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Email
 GO
-ALTER TABLE EMPLEADO
-DROP  CONSTRAINT Ck_Email
+
 ALTER TABLE EMPLEADO
 add constraint Ck_Email CHECK (Email like '%[^@]@%[^.].[a-z][a-z][a-z]')
 GO
@@ -331,8 +350,7 @@ GO
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Telefono
 GO
-ALTER TABLE EMPLEADO
-DROP CONSTRAINT Ck_Telefono
+
 ALTER TABLE EMPLEADO
 add constraint Ck_Telefono CHECK (telefono like '%[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]%')
 GO
@@ -420,6 +438,37 @@ begin
 end
 go
 
+--=========DEPARTAMENTO========
+drop proc if exists sp_insertardepartamento
+go
+create proc sp_insertardepartamento
+	@depa nvarchar(50), @nom nvarchar(50), 
+	@S_D_SuId int, @resultado nvarchar(80)
+as
+begin
+if @depa is null or len(@depa)< 10 or len(@depa)>10
+	begin
+	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
+	return
+end
+if @nom is null or len(@nom)=0
+	begin
+	set @resultado='El nombre ingresado no es valido'
+	return
+end
+if @depa is null or len(@S_D_Suid)< 10 or len(@S_D_Suid)>10
+	begin
+	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
+	return
+end
+
+insert into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
+values (@depa, @nom, @S_D_SuId)
+set @resultado = 'Registro Insertado'
+end
+go
+
+
 --=========REGION========
 drop procedure if exists sp_InsertarRegion
 go
@@ -478,10 +527,24 @@ SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Seleccion Exitosa'
 GO
 
+--=======DEPARTAMENTO=========
+
+DROP PROCEDURE if exists sp_SelecionaDepartamento
+go
+CREATE PROCEDURE sp_SeleccionaDepartamento
+@id int, @resultado nvarchar(50) output
+AS
+BEGIN
+SELECT * FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
+SET @resultado='Seleccion Exitosa'
+END
+GO
+
+
 --=========REGION========
 
 DROP PROCEDURE if exists sp_SeleccionaRegion
-
+GO
 CREATE PROCEDURE sp_SeleccionaRegion
 @id INT, @resultado nvarchar(50) output
 AS 
@@ -530,6 +593,32 @@ begin
 	   SET @resultado='Actualizacion Exitosa'
 end
 GO
+
+--=======DEPARTAMENTO========
+
+DROP PROCEDURE IF exists sp_UpdateDepartamento
+go
+CREATE PROCEDURE sp_UpdateDepartamento
+@id int, 
+@nom nvarchar(50), 
+@S_D_SUID int,
+@resultado nvarchar(50) output
+AS
+BEGIN
+if @nom is null or LEN(@nom)=0
+	begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	UPDATE DEPARTAMENTO SET  
+       [Uk_Nombre] = @nom,
+	   [Fk_Sucursal_Departamento_SucursalId] = @S_D_SUID
+       WHERE Pk_Departamento_ID= @id
+	   SET @resultado='Actualizacion Exitosa'
+end
+GO
+
+
 --=========REGION========
 DROP PROCEDURE if exists sp_UpdateRegion
 go
@@ -591,6 +680,20 @@ AS
 DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Eliminacion Exitosa'
 GO
+
+--=====DEPARTAMENTO========
+
+DROP PROCEDURE IF EXISTS sp_deleteDepartamento
+go
+ CREATE PROCEDURE sp_deleteDepartamento
+@id INT,
+@resultado nvarchar(50) output
+AS 
+DELETE FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
+SET @resultado='Eliminacion Exitosa'
+GO
+
+
 --=========REGION========
 DROP PROCEDURE if exists sp_DeleteRegion
 go
@@ -610,114 +713,6 @@ CREATE PROCEDURE sp_DeletePais
 AS 
 DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
-GO
-
-/*----------------------------------------
-      INSERT TABLA DEPARTAMENTO
-------------------------------------------*/
-
-DROP PROC IF EXISTS SP_INSERTAR_DEPARTAMENTOS
-go
-
-CREATE PROC SP_INSERTAR_DEPARTAMENTOS
-	@depa nvarchar(50), @nom nvarchar(50), @S_D_SuId int, @mensaje nvarchar(80)
-
-AS
-BEGIN
-
-IF @depa is null or count(@depa)< 10 or count(@depa)>10
-BEGIN
-SET @mensaje ='¡Id Departamento invalido! Id 10 digitos'
-RETURN
-END
-
-
-INSERT into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
-VALUES (@depa, @nom, @S_D_SuId)
-SET @mensaje = 'Registro Insertado'
-END
-GO
-
-
-/*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
-
-DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
-go
-CREATE TRIGGER INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
-ON EMPLEADO_CONTRATOS
-FOR INSERT
-as
-	DECLARE @ContratoID int
-	DECLARE @EmpleadoID int
-	DECLARE @fechaI date
-	DECLARE @fechaF date
-	DECLARE @SueldoB decimal(8,2)
-	DECLARE @Comisionvta decimal(8,2)
-	DECLARE @PuestoID int
-	DECLARE @DepartamentoID int
-	DECLARE @Años int
-	DECLARE @Meses int
-	DECLARE @Dias int
-
-	SET @ContratoID  = (SELECT Pk_Contrato_Id FROM Inserted)
-	SET @EmpleadoID = (SELECT Fk_Empleado_EmpleadoContratos_EmpleadoId FROM Inserted)
-	SET @fechaI = (SELECT Fecha_Inicio FROM Inserted)
-	SET @fechaF = (SELECT Fecha_Termino FROM Inserted)
-	SET @SueldoB = (SELECT Sueldo_Basico FROM Inserted)
-	SET @Comisionvta = (SELECT Comision_vta FROM Inserted)
-	SET @PuestoID = (SELECT Fk_Puesto_EmpleadoContratos_PuestoId FROM Inserted)
-	SET @DepartamentoID = (SELECT Fk_Departamento_EmpleadoContratos_DepartamentoId FROM Inserted)
-	
-	SET @Años = (SELECT DATEDIFF(YEAR,@fechaI,@fechaF))
-	SET @Meses = (SELECT DATEDIFF(MONTH,@fechaI,@fechaF))
-	SET @Dias = (SELECT DATEDIFF(DAY,@fechaI,@fechaF))
-
-
-	INSERT INTO EMPLEADO_CONTRATO_HISTORIAL 
-	VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
-
-Go
-
---------------push prueba------------------------
-
---================================================
---			Inserción de Datos(Para Prueba)
---=================================================
-
-INSERT 
-INTO PUESTO 
-VALUES
-('Administrador',1500,930)
-GO
-
-INSERT
-INTO REGION
-VALUES
-('Sur America')
-GO
-
-INSERT 
-INTO PAIS
-VALUES
-('PERU',2)
-GO
-
-INSERT 
-INTO SUCURSAL
-VALUES
-('Av.Tomas Marzano #2156','Lima','Lima',1)
-GO
-
-INSERT 
-INTO DEPARTAMENTO
-VALUES 
-('Administración',1)
-GO
-
-INSERT 
-INTO EMPLEADO
-VALUES
-('DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138',1)
 GO
 
 --===========================================
@@ -781,9 +776,9 @@ AS
 	END
 
 	INSERT INTO EMPLEADO 
-	(Tipo_Doc_Identidad,Uk_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono,Fk_Empleado_Empleado_SupervisorId)
+	(Tipo_Doc_Identidad,Uk_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono)
 	VALUES
-	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono,1)
+	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono)
 
 	SET @Mensaje = 'Datos Insertados Correctamente'
 
@@ -808,16 +803,196 @@ Go
 
 -------------UPDATE-----------------------
 
-CREATE PROC sp_ListarWhere_Empleado
-@EmpleadoId int 
-As
-	Declare @Mensaje nvarchar(200);
+
+CREATE PROC sp_Update_Empleado
+@EmpleadoId int,
+@Type_document nvarchar(20),
+@N_document nvarchar(20),
+@Nombre nvarchar(40),
+@Apellido nvarchar(40),
+@Email nvarchar(50),
+@Nacionalidad nvarchar(40),
+@telefono nvarchar(20)
+
+AS
+	DECLARE @Mensaje nvarchar(200) 
 	IF (@EmpleadoId is null or len(@EmpleadoId)= 0)
 	BEGIN
 		SET @Mensaje = 'Error en el parámetro @EmpleadoId el dato ingresado es nulo o fuera de rango'
 		print @Mensaje
 		RETURN
 	END
+	IF(@Type_document is null or len(@Type_document)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Tipo_Doc_Indetidad el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@N_document is null or len(@N_document)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Uk_Nro_Doc_Identidad el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Nombre is null or len(@Nombre)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Nombre el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Apellido is null or len(@Apellido)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Apellido el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Email is null or len(@Email)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Email el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Nacionalidad is null or len(@Nacionalidad)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Nacionalidad el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@telefono is null or len(@telefono)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo telefono el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
 
-	SELECT * FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+	UPDATE EMPLEADO 
+	SET Tipo_Doc_Identidad = @Type_document, Uk_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono
+	WHERE Pk_Empleado_Id = @EmpleadoId
+	SET @Mensaje = 'Datos Actualizados Correctamente'
+
+	Print @Mensaje
+
 Go
+
+--------------DELETE-----------------
+CREATE PROC sp_Delete_Empleado
+@EmpleadoId int
+AS	
+	DECLARE @Mensaje nvarchar(200)
+	IF(@EmpleadoId is null or len(@EmpleadoId) = 0 )
+	BEGIN
+		SET @Mensaje = 'Error en el parámetro @EmpleadoId el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+
+	DELETE FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+
+	SET @Mensaje = 'Datos Eliminados Correctamente'
+	Print @Mensaje
+Go
+
+
+
+/*---TRIGGER DE INSERCION EMPLEADO_HISTORIAL AL ELIMINAR (MATOS)---*/
+
+DROP TRIGGER IF EXISTS INSERTAR_EMPLEADO_HISTORIAL
+go
+CREATE TRIGGER INSERTAR_EMPLEADO_HISTORIAL
+ON EMPLEADO
+FOR DELETE
+as
+	INSERT INTO EMPLEADO_HISTORIAL(Empleado_Id, Tipo_Doc_Identidad, Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono)
+	SELECT 
+	Pk_Empleado_Id, Tipo_Doc_Identidad, Uk_Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono
+	FROM DELETED
+Go
+
+/*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
+
+DROP TRIGGER IF EXISTS INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
+go
+CREATE TRIGGER INSERT_HISTORIAL_EMPLEADO_CONTRATOS_V2
+ON EMPLEADO_CONTRATOS
+FOR INSERT
+as
+	DECLARE @ContratoID int
+	DECLARE @EmpleadoID int
+	DECLARE @fechaI date
+	DECLARE @fechaF date
+	DECLARE @SueldoB decimal(8,2)
+	DECLARE @Comisionvta decimal(8,2)
+	DECLARE @PuestoID int
+	DECLARE @DepartamentoID int
+	DECLARE @Años int
+	DECLARE @Meses int
+	DECLARE @Dias int
+
+	SET @ContratoID  = (SELECT Pk_Contrato_Id FROM Inserted)
+	SET @EmpleadoID = (SELECT Fk_Empleado_EmpleadoContratos_EmpleadoId FROM Inserted)
+	SET @fechaI = (SELECT Fecha_Inicio FROM Inserted)
+	SET @fechaF = (SELECT Fecha_Termino FROM Inserted)
+	SET @SueldoB = (SELECT Sueldo_Basico FROM Inserted)
+	SET @Comisionvta = (SELECT Comision_vta FROM Inserted)
+	SET @PuestoID = (SELECT Fk_Puesto_EmpleadoContratos_PuestoId FROM Inserted)
+	SET @DepartamentoID = (SELECT Fk_Departamento_EmpleadoContratos_DepartamentoId FROM Inserted)
+	
+	SET @Años = (SELECT DATEDIFF(YEAR,@fechaI,@fechaF))
+	SET @Meses = (SELECT DATEDIFF(MONTH,@fechaI,@fechaF))
+	SET @Dias = (SELECT DATEDIFF(DAY,@fechaI,@fechaF))
+
+
+	INSERT INTO EMPLEADO_CONTRATO_HISTORIAL 
+	VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
+
+Go
+
+--------------push prueba------------------------
+
+--================================================
+--			Inserción de Datos(Para Prueba)
+--=================================================
+
+INSERT 
+INTO PUESTO 
+VALUES
+('Administrador',1500,930)
+GO
+
+INSERT
+INTO REGION
+VALUES
+('Sur America')
+GO
+
+
+INSERT 
+INTO PAIS
+VALUES
+('PERU',1)
+GO
+
+INSERT 
+INTO SUCURSAL
+VALUES
+('Av.Tomas Marzano #2156','Lima','Lima',1)
+GO
+
+INSERT 
+INTO DEPARTAMENTO
+VALUES 
+('Administración',1)
+GO
+
+INSERT 
+INTO EMPLEADO
+VALUES
+
+('DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138',1)
+GO
+
+insert into EMPLEADO_CONTRATOS
+values(1,'22-07-2021', '22-08-2022', 950, 500, 1, 1)
+go
+
+
