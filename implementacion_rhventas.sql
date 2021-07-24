@@ -72,7 +72,7 @@ CREATE TABLE EMPLEADO
 	Email nvarchar(50) not null,
 	Nacionalidad nvarchar(40) not null,
 	telefono nvarchar(20) not null,
-	--Fk_Empleado_Empleado_SupervisorId int not null
+	Fk_Empleado_Empleado_SupervisorId int -- Ahora se permiten ingresar valores nulos porque no puede supervisarse uno mismo
 )
 go
 
@@ -358,6 +358,8 @@ GO
 /*Creacion de CRUD tabla USUARIO*/
 
 ----------INSERT------------------
+DROP PROCEDURE if exists sp_insert_Usuario
+go
 CREATE PROCEDURE sp_insert_Usuario
 @Nombre nvarchar(50),
 @Passwor nvarchar(12),
@@ -529,7 +531,7 @@ GO
 
 --=======DEPARTAMENTO=========
 
-DROP PROCEDURE if exists sp_SelecionaDepartamento
+DROP PROCEDURE if exists sp_SeleccionaDepartamento
 go
 CREATE PROCEDURE sp_SeleccionaDepartamento
 @id int, @resultado nvarchar(50) output
@@ -720,7 +722,8 @@ GO
 --==========================================
 
 ---------------INSERTAR--------------------
-
+DROP PROCEDURE if exists sp_Insertar_Empleado
+go
 CREATE PROC sp_Insertar_Empleado
 @Type_document nvarchar(20),
 @N_document nvarchar(20),
@@ -787,6 +790,8 @@ AS
 Go
 
 --------------READ-----------------------
+DROP PROCEDURE IF EXISTS sp_ListarWhere_Empleado
+go
 CREATE PROC sp_ListarWhere_Empleado
 @EmpleadoId int 
 As
@@ -802,7 +807,8 @@ As
 Go
 
 -------------UPDATE-----------------------
-
+DROP PROCEDURE IF EXISTS sp_Update_Empleado
+go
 
 CREATE PROC sp_Update_Empleado
 @EmpleadoId int,
@@ -875,6 +881,9 @@ AS
 Go
 
 --------------DELETE-----------------
+DROP PROCEDURE IF EXISTS sp_Delete_Empleado
+go
+
 CREATE PROC sp_Delete_Empleado
 @EmpleadoId int
 AS	
@@ -953,6 +962,7 @@ Go
 --			Inserción de Datos(Para Prueba)
 --=================================================
 
+/*
 INSERT 
 INTO PUESTO 
 VALUES
@@ -994,5 +1004,5 @@ GO
 insert into EMPLEADO_CONTRATOS
 values(1,'22-07-2021', '22-08-2022', 950, 500, 1, 1)
 go
-
+*/
 
