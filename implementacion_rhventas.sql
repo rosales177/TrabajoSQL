@@ -717,5 +717,107 @@ GO
 INSERT 
 INTO EMPLEADO
 VALUES
-(1,'DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138')
+('DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138',1)
 GO
+
+--===========================================
+--           CRUD Tabla EMPLEADO
+--==========================================
+
+---------------INSERTAR--------------------
+
+CREATE PROC sp_Insertar_Empleado
+@Type_document nvarchar(20),
+@N_document nvarchar(20),
+@Nombre nvarchar(40),
+@Apellido nvarchar(40),
+@Email nvarchar(50),
+@Nacionalidad nvarchar(40),
+@telefono nvarchar(20)
+
+AS
+	DECLARE @Mensaje nvarchar(200) 
+	IF(@Type_document is null or len(@Type_document)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Tipo_Doc_Indetidad el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@N_document is null or len(@N_document)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Uk_Nro_Doc_Identidad el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Nombre is null or len(@Nombre)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Nombre el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Apellido is null or len(@Apellido)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Apellido el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Email is null or len(@Email)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Email el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@Nacionalidad is null or len(@Nacionalidad)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo Nacionalidad el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+	IF(@telefono is null or len(@telefono)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo telefono el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+
+	INSERT INTO EMPLEADO 
+	(Tipo_Doc_Identidad,Uk_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono,Fk_Empleado_Empleado_SupervisorId)
+	VALUES
+	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono,1)
+
+	SET @Mensaje = 'Datos Insertados Correctamente'
+
+	Print @Mensaje
+
+Go
+
+--------------READ-----------------------
+CREATE PROC sp_ListarWhere_Empleado
+@EmpleadoId int 
+As
+	Declare @Mensaje nvarchar(200);
+	IF (@EmpleadoId is null or len(@EmpleadoId)= 0)
+	BEGIN
+		SET @Mensaje = 'Error en el parámetro @EmpleadoId el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+
+	SELECT * FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+Go
+
+-------------UPDATE-----------------------
+
+CREATE PROC sp_ListarWhere_Empleado
+@EmpleadoId int 
+As
+	Declare @Mensaje nvarchar(200);
+	IF (@EmpleadoId is null or len(@EmpleadoId)= 0)
+	BEGIN
+		SET @Mensaje = 'Error en el parámetro @EmpleadoId el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
+
+	SELECT * FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+Go
