@@ -267,17 +267,15 @@ REFERENCES SUCURSAL(Pk_Sucursal_Id)
 go
 
 
---=========FK_Empleado_Empleado_SupervisorId da Falla=======
+--=========FK_Empleado_Empleado_SupervisorId ##ARREGLADO##=======
 
-
-/*
 ALTER TABLE EMPLEADO
 DROP CONSTRAINT IF EXISTS Fk_Empleado_Empleado_SupervisorId
 go
 ALTER TABLE EMPLEADO
 ADD CONSTRAINT Fk_Empleado_Empleado_SupervisorId FOREIGN KEY(Fk_Empleado_Empleado_SupervisorId)
 REFERENCES EMPLEADO(Pk_Empleado_Id)
-go*/
+go
 
 ALTER TABLE USUARIO
 DROP CONSTRAINT IF EXISTS Fk_Empleado_Usuario_EmpleadoId
