@@ -456,12 +456,23 @@ if @nom is null or len(@nom)=0
 	set @resultado='El nombre ingresado no es valido'
 	return
 end
+-- Gente esta restriccion lo busque en inter y me parecio una manera
+-- chevere de controlar el unique ya que si se ingresa dos veces un mismo nombre el sql botara error 
+-- y eso es lo no queremos creo sino que bote el porque error
+-- pero la cosa es que no logro hacer que de o como seria?
+-- a la hora de hacer un insert con un mismo departamento ya ingresado bota error o tendra algo que ver con la tabla sucursal?
+-- porque haciendo la tabla sucursal recien me eh dado cuenta de esto
+if exists (select Uk_Nombre from DEPARTAMENTO where Uk_Nombre = ltrim(rtrim(@nom)))
+    begin 
+		set @resultado=('Error -998: El registro ya existe.')
+		return
+    end
 if @depa is null or len(@S_D_Suid)< 10 or len(@S_D_Suid)>10
 	begin
 	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
 	return
 end
-
+exec sp_insertardepartamento
 insert into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
 values (@depa, @nom, @S_D_SuId)
 set @resultado = 'Registro Insertado'
@@ -986,10 +997,11 @@ VALUES
 ('Av.Tomas Marzano #2156','Lima','Lima',1)
 GO
 
+
 INSERT 
 INTO DEPARTAMENTO
 VALUES 
-('Administración',1)
+('Administración2',1)
 GO
 
 INSERT 
