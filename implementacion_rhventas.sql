@@ -1,6 +1,8 @@
 USE master
 go
 
+/*CREACION ARCHIVOS MDF Y LDF*/
+
 DROP DATABASE IF EXISTS RH_VENTAS
 go
 
@@ -24,10 +26,14 @@ LOG ON
 )
 go
 
+/*USO DE LA BASE DE DATOS RH_VENTAS*/
 
 USE RH_VENTAS
 GO
 
+/*CREACIÓN DE TABLAS*/
+
+---TABLAS PUESTO
 DROP TABLE IF EXISTS PUESTO
 go
 CREATE TABLE PUESTO
@@ -39,26 +45,30 @@ CREATE TABLE PUESTO
 )
 go
 
+---TABLAS REGION
 DROP TABLE IF EXISTS REGION
 go
 CREATE TABLE REGION
 (
 	Pk_Region_Id int not null identity(1,1),
-	Nombre nvarchar(40) not null	
+	Uk_Region_Nombre nvarchar(40) not null	
 )
 go
 
+---TABLAS PAIS
 DROP TABLE IF EXISTS PAIS
 go
 
 CREATE TABLE PAIS
 (
 	Pk_Pais_Id int not null identity(1,1),
-	Uk_Nombre nvarchar(40) not null,
+	Uk_Pais_Nombre nvarchar(40) not null,
 	Fk_Region_Pais_RegionId int not null
 )                        
 go
 
+
+---TABLA EMPLEADO
 DROP TABLE IF EXISTS EMPLEADO
 go
 
@@ -66,7 +76,7 @@ CREATE TABLE EMPLEADO
 (
 	Pk_Empleado_Id int not null identity(1,1),
 	Tipo_Doc_Identidad nvarchar(20) not null,
-	Uk_Nro_Doc_Identidad nvarchar(20) not null,
+	Uk_Empleado_Nro_Doc_Identidad nvarchar(20) not null,
 	Nombre nvarchar(40) not null,
 	Apellido nvarchar(40) not null,
 	Email nvarchar(50) not null,
@@ -76,16 +86,18 @@ CREATE TABLE EMPLEADO
 )
 go
 
+---TABLA DEPARTAMENTO
 DROP TABLE IF EXISTS DEPARTAMENTO
 GO
 CREATE TABLE DEPARTAMENTO
 (
 	Pk_Departamento_ID int not null identity(1,1),
-	Uk_Nombre nvarchar(40) not null,
+	Uk_Departamento_Nombre nvarchar(40) not null,
 	Fk_Sucursal_Departamento_SucursalId int not null
 )
 GO
 
+---TABLA SUCURSAL
 DROP TABLE IF EXISTS SUCURSAL
 go
 
@@ -101,7 +113,7 @@ Fk_Pais_Sucursal_PaisId int not null
 go
 
 
-
+---TABLA USUARIO
 DROP TABLE IF EXISTS USUARIO
 go
 
@@ -115,9 +127,7 @@ Fk_Empleado_Usuario_EmpleadoId int not null
 )
 go
 
---================================================
---			TABLA EMPLEADO_HISTORIAL
---=================================================
+---TABLA EMPLEADO_HISTORIAL
 
 DROP TABLE IF EXISTS EMPLEADO_HISTORIAL
 go
@@ -136,9 +146,9 @@ CREATE TABLE EMPLEADO_HISTORIAL
 )
 go
 
+---TABLA EMPLEADO_CONTRATOS
 DROP TABLE IF EXISTS EMPLEADO_CONTRATOS
 GO
-
 CREATE TABLE EMPLEADO_CONTRATOS
 (
 	Pk_Contrato_Id int not null identity(1,1),
@@ -153,6 +163,7 @@ CREATE TABLE EMPLEADO_CONTRATOS
 )
 GO
 
+---TABLA EMPLEADO_CONTRATO_HISTORIAL
 DROP TABLE IF EXISTS EMPLEADO_CONTRATO_HISTORIAL
 GO
 CREATE TABLE EMPLEADO_CONTRATO_HISTORIAL
@@ -174,6 +185,8 @@ GO
 
 
 /*---PRIMARY KEY---*/
+
+--NOMENCLATURA: Pk_NombreTabla_NombreCampo
 
 ALTER TABLE PUESTO
 DROP CONSTRAINT IF EXISTS Pk_Puesto_Id
@@ -242,6 +255,8 @@ go
 
 /*---FOREIGN KEYS---*/
 
+--NOMENCLATURA : Fk_TablaOrigen_TablaDestino_NombreCampo
+
 ALTER TABLE PAIS
 DROP CONSTRAINT IF EXISTS Fk_Region_Pais_RegionId
 go
@@ -265,9 +280,6 @@ ALTER TABLE DEPARTAMENTO
 ADD CONSTRAINT Fk_Sucursal_Deparatamento_SucursalId FOREIGN KEY(Fk_Sucursal_Departamento_SucursalId)
 REFERENCES SUCURSAL(Pk_Sucursal_Id)
 go
-
-
---=========FK_Empleado_Empleado_SupervisorId ##ARREGLADO##=======
 
 ALTER TABLE EMPLEADO
 DROP CONSTRAINT IF EXISTS Fk_Empleado_Empleado_SupervisorId
@@ -295,6 +307,14 @@ REFERENCES EMPLEADO(Pk_Empleado_Id)
 go
 
 ALTER TABLE EMPLEADO_CONTRATOS
+DROP CONSTRAINT IF EXISTS Fk_Puesto_EmpleadoContratos_PuestoId
+
+
+ALTER TABLE EMPLEADO_CONTRATOS
+ADD CONSTRAINT Fk_Puesto_EmpleadoContratos_PuestoId FOREIGN KEY(Fk_Puesto_EmpleadoContratos_PuestoId)
+REFERENCES PUESTO(Pk_Puesto_Id)
+
+ALTER TABLE EMPLEADO_CONTRATOS
 DROP CONSTRAINT if  exists Fk_Departamento_EmpleadoContratos_DepartamentoId
 go
 ALTER TABLE EMPLEADO_CONTRATOS
@@ -304,30 +324,38 @@ go
 
 /*---UNIQUE KEY---*/
 
+--NOMENCLATURA : Uk_NombreTabla_NombreCampo
+
 ALTER TABLE PAIS
-drop constraint IF EXISTS Uk_NombreP
+drop constraint IF EXISTS Uk_Pais_NombreP
 GO
 ALTER TABLE PAIS
-add constraint Uk_NombreP Unique (Uk_Nombre)
+add constraint Uk_Pais_NombreP Unique (Uk_Pais_Nombre)
 GO
 
 ALTER TABLE DEPARTAMENTO
-drop constraint IF EXISTS Uk_Nombre
+drop constraint IF EXISTS Uk_Departamento_Nombre
 GO
 ALTER TABLE DEPARTAMENTO
-add constraint Uk_Nombre Unique (Uk_Nombre)
+add constraint Uk_Departamento_Nombre Unique (Uk_Departamento_Nombre)
 GO
 
 ALTER TABLE EMPLEADO
-drop constraint IF EXISTS Uk_Nro_Doc_Identidad
+drop constraint IF EXISTS Uk_Empleado_Nro_Doc_Identidad
 GO
 ALTER TABLE EMPLEADO
-add constraint Uk_Nro_Doc_Identidad Unique (Uk_Nro_Doc_Identidad)
+add constraint Uk_Empleado_Nro_Doc_Identidad Unique (Uk_Empleado_Nro_Doc_Identidad
 GO
 
-
-
+ALTER TABLE REGION
+DROP CONSTRAINT IF EXISTS Uk_Region_Nombre
+Go
+ALTER TABLE REGION 
+ADD CONSTRAINT Uk_Region_Nombre UNIQUE(Uk_Region_Nombre)
+GO
 /*---ALTER CHECK---*/
+
+--NOMENCLATURA : Ck_NombreCampo
 
 ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Ck_Nro_Doc_Identidad
@@ -360,13 +388,40 @@ DROP PROCEDURE if exists sp_insert_Usuario
 go
 CREATE PROCEDURE sp_insert_Usuario
 @Nombre nvarchar(50),
-@Passwor nvarchar(12),
+@Password nvarchar(12),
 @Estado char(1),
 @EmpleadoId int 
 as	
-	Declare @frase nvarchar(20);
-	Set @frase = 'EstaEsMiFrace'
+	DECLARE @Mensaje nvarchar(200);
+	DEClARE @frase nvarchar(20);
+	IF(@Nombre is null or LEN(@Nombre)=0 or LEN(@Nombre) >50 )
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Nombre, valor fuera de rango o nulo'
+		Print @Mensaje
+		return 
+	END
+	IF(@Password is Null or LEN(@Password)= 0 or LEN(@Password)> 12)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Password, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Estado is null or LEN(@Estado)=0 or LEN(@Estado)>1)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Estado, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@EmpleadoId is null or LEN(@EmpleadoId)= 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @EmpleadoId, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END 
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	Set @frase = 'TOPSECRET'
 	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Passwor),@Estado,@EmpleadoId)
+	Print @Mensaje
 Go
  ----------SELECT WHERE----------------
  
@@ -375,7 +430,14 @@ go
 CREATE PROCEDURE sp_Select_Usuario
 @EmpleadoID int
 as
-	SELECT * FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = 'EmpleadoID' 
+	DECLARE @Mensaje nvarchar(200);
+	IF(@EmpleadoID is null or LEN(@EmpleadoID) =0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Nombre, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	SELECT * FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID 
 go
 
 -------------UPDATE-------------------
@@ -385,23 +447,58 @@ CREATE PROC sp_Update_Usuario
 @Nombre nvarchar,
 @Password nvarchar(12),
 @Estado char(1),
-@EmpleadorID int
+@EmpleadoId int
 as
-	Declare @frase nvarchar(20);
-	Set @frase = 'EstaEsMiFrace'
+	DECLARE @Mensaje nvarchar(200);
+	DEClARE @frase nvarchar(20);
+	IF(@Nombre is null or LEN(@Nombre)=0 or LEN(@Nombre) >50 )
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Nombre, valor fuera de rango o nulo'
+		Print @Mensaje
+		return 
+	END
+	IF(@Password is Null or LEN(@Password)= 0 or LEN(@Password)> 12)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Password, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Estado is null or LEN(@Estado)=0 or LEN(@Estado)>1)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Estado, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@EmpleadoId is null or LEN(@EmpleadoId)= 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @EmpleadoId, valor fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END 
+	SET @Mensaje = 'Datos Actualizados Correctamente'
+	Set @frase = 'TOPSECRET'
 	UPDATE USUARIO 
 	SET Pk_Nombre = @Nombre, Pass = ENCRYPTBYPASSPHRASE(@frase,@Password),Estado=@Estado 
-	WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadorID
-
+	WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoId
+	PRINT(@Mensaje)
 GO
 
 -------------DELETE--------------------
 DROP PROC IF EXISTS sp_Delete_Usuario
 go
 CREATE PROC sp_Delete_Usuario
-@EmpleadoID int 
+@EmpleadoId int 
 as
+	DECLARE @Mensaje nvarchar(200);
+	IF(@EmpleadoId is null or LEN(@EmpleadoId)=0)
+	BEGIN
+		SET @EmpleadoId = 'Error en la variable @EmpleadoId, valor fuera de rango o nulo'
+		PRINT @EmpleadoId
+		RETURN
+	END
+	SET @EmpleadoId = 'Datos eliminados correctamente'
 	DELETE FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID
+	PRINT @EmpleadoId
 go
 
 
@@ -413,28 +510,32 @@ go
 drop procedure if exists sp_InsertarPuesto
 go
 create proc sp_InsertarPuesto
-	@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
-	@resultado nvarchar(50) output
+	@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2)
 as
 begin
+	DECLARE @resultado nvarchar(100);
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		print @resultado
 		return
 	end
 	if @smax is null or len(@smax)=0 or len(@smax)=0
 		begin
 		set @resultado = 'El monto es invalido'
+		print @resultado
 		return 
 	end
 	if @smin is null or len(@smin)=0 or len(@smin)=0
 		begin
 		set @resultado = 'El monto es invalido'
+		print @resultado
 		return 
 	end
 	insert PUESTO(Nombre, Salario_Maximo, Salario_Minimo)
 	values(@nom, @smax, @smin)
 	set @resultado='Registro Insertado'
+	print @resultado
 end
 go
 
@@ -442,47 +543,37 @@ go
 drop proc if exists sp_insertardepartamento
 go
 create proc sp_insertardepartamento
-	--@depa nvarchar(50), 
 	@nom nvarchar(50), 
-	@S_D_SuId int, @resultado nvarchar(80) output
+	@S_D_SuId int
 as
 begin
-	/*if @depa is null or len(@depa)< 10 or len(@depa)>10
-		begin
-		set @resultado ='¡Id Departamento invalido! Id 10 digitos'
-		return
-	end*/
-
-	--(MATOS)>	El id creo que no se debe comprobar porque ya lleva identity y aumenta solo
-	--			Por ahora solo lo he comentado y borre las variables, el otro problema era al comprobar el Id de sucursal
-	--			Porque el codigo que puso geraldo si funciona
-	--------------------------------------------------------------
+	DECLARE @resultado nvarchar(80);
 	if @nom is null or len(@nom)=0
 		begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
-	-- Gente esta restriccion lo busque en inter y me parecio una manera
-	-- chevere de controlar el unique ya que si se ingresa dos veces un mismo nombre el sql botara error 
-	-- y eso es lo no queremos creo sino que bote el porque error
-	-- pero la cosa es que no logro hacer que de o como seria?
-	-- a la hora de hacer un insert con un mismo departamento ya ingresado bota error o tendra algo que ver con la tabla sucursal?
-	-- porque haciendo la tabla sucursal recien me eh dado cuenta de esto
+	
 	if exists (select Uk_Nombre from DEPARTAMENTO where Uk_Nombre = ltrim(rtrim(@nom)))
 		begin 
 			set @resultado=('Error -998: El registro ya existe.')
+			PRINT @resultado
 			return
 		end
 	if @S_D_SuId is null or @S_D_SuId=0/*(@S_D_Suid)< 10 or len(@S_D_Suid)>10*/
 		begin
 		set @resultado ='¡Id Sucursal invalido! Id 10 digitos'
+		PRINT @resultado
 		return
 	end
 
 	insert into DEPARTAMENTO (Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
 	values (@nom, @S_D_SuId)
 	set @resultado = 'Registro Insertado'
+	PRINT @resultado
 end
+
 go
 
 
@@ -491,18 +582,20 @@ go
 drop procedure if exists sp_InsertarRegion
 go
 create proc sp_InsertarRegion
-	@nom nvarchar(40),
-	@resultado nvarchar(50) output
+	@nom nvarchar(40)
 as
 begin
+	DECLARE @resultado nvarchar(50)
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	insert REGION(Nombre)
 	values(@nom)
 	set @resultado='Registro Insertado'
+	PRINT @resultado
 end
 go
 
@@ -510,23 +603,26 @@ go
 drop procedure if exists sp_InsertarPais
 go
 create proc sp_InsertarPais
-	@nom nvarchar(40), @reg int,
-	@resultado nvarchar(50) output
+	@nom nvarchar(40), @reg int
 as
 begin
+	DECLARE @resultado nvarchar(100)
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	if @reg is null or LEN(@reg)=0
 	begin
 		set @resultado='El codigo de region ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	insert PAIS(Uk_Nombre,Fk_Region_Pais_RegionId)
 	values(@nom,@reg)
 	set @resultado='Registro Insertado'
+	PRINT @resultado
 end
 go
 
@@ -539,10 +635,12 @@ go
 DROP PROCEDURE if exists sp_SeleccionaPuesto
 go
 CREATE PROCEDURE sp_SeleccionaPuesto
-@id INT, @resultado nvarchar(50) output
+@id INT
 AS 
+DEClARE @resultado nvarchar(100)
 SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Seleccion Exitosa'
+PRINT @resultado
 GO
 
 --=======DEPARTAMENTO=========
@@ -550,11 +648,12 @@ GO
 DROP PROCEDURE if exists sp_SeleccionaDepartamento
 go
 CREATE PROCEDURE sp_SeleccionaDepartamento
-@id int, @resultado nvarchar(50) output
+@id int
 AS
-BEGIN
+DECLARE @resultado nvarchar(100)
 SELECT * FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
 SET @resultado='Seleccion Exitosa'
+PRINT @resultado
 END
 GO
 
@@ -564,10 +663,12 @@ GO
 DROP PROCEDURE if exists sp_SeleccionaRegion
 GO
 CREATE PROCEDURE sp_SeleccionaRegion
-@id INT, @resultado nvarchar(50) output
+@id INT
 AS 
+DECLARE @resultado nvarchar(100)
 SELECT * FROM REGION WHERE Pk_Region_Id = @id
 SET @resultado='Seleccion Exitosa'
+PRINT @resultado
 GO
 
 --======================================
@@ -579,28 +680,32 @@ DROP PROCEDURE if exists sp_UpdatePuesto
 go
 CREATE PROCEDURE sp_UpdatePuesto  
 @id INT, 
-@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2),
-@resultado nvarchar(50) output
+@nom nvarchar(40), @smax decimal(6,2), @smin decimal(6,2)
 AS
+	DECLARE @resultado nvarchar(100)
 begin
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	if @smax is null or len(@smax)=0 or len(@smax)=0
 		begin
 		set @resultado = 'El monto es invalido'
+		PRINT @resultado
 		return 
 	end
 	if @smin is null or len(@smin)=0 or len(@smin)=0
 		begin
 		set @resultado = 'El monto es invalido'
+		PRINT @resultado
 		return 
 	end
 	UPDATE PUESTO SET  
@@ -609,6 +714,7 @@ begin
 	   [Salario_Minimo] = @smin
        WHERE Pk_Puesto_Id= @id
 	   SET @resultado='Actualizacion Exitosa'
+	PRINT @resultado
 end
 GO
 
@@ -619,13 +725,14 @@ go
 CREATE PROCEDURE sp_UpdateDepartamento
 @id int, 
 @nom nvarchar(50), 
-@S_D_SUID int,
-@resultado nvarchar(50) output
+@S_D_SUID int
 AS
+DECLARE @resultado nvarchar(100)
 BEGIN
 if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	UPDATE DEPARTAMENTO SET  
@@ -633,6 +740,7 @@ if @nom is null or LEN(@nom)=0
 	   [Fk_Sucursal_Departamento_SucursalId] = @S_D_SUID
        WHERE Pk_Departamento_ID= @id
 	   SET @resultado='Actualizacion Exitosa'
+	   PRINT @resultado
 end
 GO
 
@@ -642,19 +750,21 @@ DROP PROCEDURE if exists sp_UpdateRegion
 go
 CREATE PROCEDURE sp_UpdateRegion  
 @id INT, 
-@nom VARCHAR(40),
-@resultado nvarchar(50) output
+@nom VARCHAR(40)
 AS
+DECLARE @resultado nvarchar(100)
 begin
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	UPDATE REGION SET  
        [Nombre] = @nom
        WHERE Pk_Region_Id= @id
 	   SET @resultado='Actualizacion Exitosa'
+	PRINT @resultado
 end
 GO
 --=========PAIS========
@@ -665,15 +775,18 @@ CREATE PROCEDURE sp_UpdatePais
 @nom VARCHAR(40), @reg int,
 @resultado nvarchar(50) output
 AS
+DECLARE @resultado nvarchar(100)
 begin
 	if @nom is null or LEN(@nom)=0
 	begin
 		set @resultado='El nombre ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	if @reg is null or LEN(@reg)=0
 	begin
 		set @resultado='El codigo de region ingresado no es valido'
+		PRINT @resultado
 		return
 	end
 	UPDATE PAIS SET  
@@ -681,6 +794,7 @@ begin
 	   [Fk_Region_Pais_RegionId]= @reg
        WHERE Pk_Pais_Id= @id
 	   SET @resultado='Actualizacion Exitosa'
+	PRINT @resultado
 end
 GO
 
@@ -692,11 +806,12 @@ GO
 DROP PROCEDURE if exists sp_DeletePuesto
 go
 CREATE PROCEDURE sp_DeletePuesto
-@id INT,
-@resultado nvarchar(50) output
+@id INT
 AS 
+DECLARE @resultado nvarchar(100)
 DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
 SET @resultado='Eliminacion Exitosa'
+PRINT @resultado
 GO
 
 --=====DEPARTAMENTO========
@@ -704,11 +819,12 @@ GO
 DROP PROCEDURE IF EXISTS sp_deleteDepartamento
 go
  CREATE PROCEDURE sp_deleteDepartamento
-@id INT,
-@resultado nvarchar(50) output
+@id INT
 AS 
+DECLARE @resultado nvarchar(100)
 DELETE FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
 SET @resultado='Eliminacion Exitosa'
+PRINT @resultado
 GO
 
 
@@ -716,21 +832,23 @@ GO
 DROP PROCEDURE if exists sp_DeleteRegion
 go
 CREATE PROCEDURE sp_DeleteRegion
-@id INT,
-@resultado nvarchar(50) output
+@id INT
 AS 
+DECLARE @resultado nvarchar(100)
 DELETE FROM REGION WHERE Pk_Region_Id = @id
 SET @resultado='Eliminacion Exitosa'
+PRINT @resultado
 GO
 --=========PAIS========
 DROP PROCEDURE if exists sp_DeletePais
 go
 CREATE PROCEDURE sp_DeletePais
-@id INT,
-@resultado nvarchar(50) output
+@id INT
 AS 
+DECLARE @resultado nvarchar(100)
 DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
+PRINT @resultado
 GO
 
 --===========================================
@@ -1021,18 +1139,29 @@ insert into EMPLEADO_CONTRATOS
 values(1,'22-07-2021', '22-08-2022', 950, 500, 1, 1)
 go
 
+*/
 
---================================================
---	Comprobando el funcionamiento de los sp_
---================================================
+--(Rosales)Modificaciones Realizadas(Borrar este comentario)
 
+/*
+	-Se creo el Foreign Key de Puesto a Empleados_Contratos ya que no existia
 
-Select * from DEPARTAMENTO;
+	-Se modifico la nomenclatura de los Unique Key
 
-declare @mensaje varchar(50)
-exec sp_insertardepartamento 'Reparaciones', 1, @mensaje output
-select @mensaje
-go
+			de Uk_NombreCampo a Uk_Tabla_NombreCampo
+
+	--Se Agregaron los comentarios correspondiente
+
+	-Los Procedimientos almacenados que contenian variables de salida fueron modificadas para que el mensaje
+	fuera mostrado al ejecutar el Sp
+
+	Remplazando el output por variables locales
+
+	Ejemplo 
+
+	Ejecutar.....
+
+	exec sp_insertardepartamento 'Almacen', 1
 
 
 */
