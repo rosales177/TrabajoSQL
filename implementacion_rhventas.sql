@@ -344,7 +344,7 @@ ALTER TABLE EMPLEADO
 drop constraint IF EXISTS Uk_Empleado_Nro_Doc_Identidad
 GO
 ALTER TABLE EMPLEADO
-add constraint Uk_Empleado_Nro_Doc_Identidad Unique (Uk_Empleado_Nro_Doc_Identidad
+add constraint Uk_Empleado_Nro_Doc_Identidad Unique (Uk_Empleado_Nro_Doc_Identidad)
 GO
 
 ALTER TABLE REGION
@@ -362,7 +362,7 @@ drop constraint IF EXISTS Ck_Nro_Doc_Identidad
 GO
 
 ALTER TABLE EMPLEADO
-add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Nro_Doc_Identidad not like  '%[^0-9]%')
+add constraint Ck_Nro_Doc_Identidad CHECK (Uk_Empleado_Nro_Doc_Identidad not like  '%[^0-9]%')
 GO
 
 ALTER TABLE EMPLEADO
@@ -420,7 +420,7 @@ as
 	END 
 	SET @Mensaje = 'Datos Insertados Correctamente'
 	Set @frase = 'TOPSECRET'
-	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Passwor),@Estado,@EmpleadoId)
+	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Password),@Estado,@EmpleadoId)
 	Print @Mensaje
 Go
  ----------SELECT WHERE----------------
@@ -555,7 +555,7 @@ begin
 		return
 	end
 	
-	if exists (select Uk_Nombre from DEPARTAMENTO where Uk_Nombre = ltrim(rtrim(@nom)))
+	if exists (select Uk_Departamento_Nombre from DEPARTAMENTO where Uk_Departamento_Nombre = ltrim(rtrim(@nom)))
 		begin 
 			set @resultado=('Error -998: El registro ya existe.')
 			PRINT @resultado
@@ -568,7 +568,7 @@ begin
 		return
 	end
 
-	insert into DEPARTAMENTO (Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
+	insert into DEPARTAMENTO (Uk_Departamento_Nombre, Fk_Sucursal_Departamento_SucursalId)
 	values (@nom, @S_D_SuId)
 	set @resultado = 'Registro Insertado'
 	PRINT @resultado
@@ -592,7 +592,7 @@ begin
 		PRINT @resultado
 		return
 	end
-	insert REGION(Nombre)
+	insert REGION(Uk_Region_Nombre)
 	values(@nom)
 	set @resultado='Registro Insertado'
 	PRINT @resultado
@@ -619,7 +619,7 @@ begin
 		PRINT @resultado
 		return
 	end
-	insert PAIS(Uk_Nombre,Fk_Region_Pais_RegionId)
+	insert PAIS(Uk_Pais_Nombre,Fk_Region_Pais_RegionId)
 	values(@nom,@reg)
 	set @resultado='Registro Insertado'
 	PRINT @resultado
@@ -654,7 +654,6 @@ DECLARE @resultado nvarchar(100)
 SELECT * FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
 SET @resultado='Seleccion Exitosa'
 PRINT @resultado
-END
 GO
 
 
@@ -736,7 +735,7 @@ if @nom is null or LEN(@nom)=0
 		return
 	end
 	UPDATE DEPARTAMENTO SET  
-       [Uk_Nombre] = @nom,
+       [Uk_Departamento_Nombre] = @nom,
 	   [Fk_Sucursal_Departamento_SucursalId] = @S_D_SUID
        WHERE Pk_Departamento_ID= @id
 	   SET @resultado='Actualizacion Exitosa'
@@ -761,7 +760,7 @@ begin
 		return
 	end
 	UPDATE REGION SET  
-       [Nombre] = @nom
+       [Uk_Region_Nombre] = @nom
        WHERE Pk_Region_Id= @id
 	   SET @resultado='Actualizacion Exitosa'
 	PRINT @resultado
@@ -772,8 +771,7 @@ DROP PROCEDURE if exists sp_UpdatePais
 go
 CREATE PROCEDURE sp_UpdatePais  
 @id INT, 
-@nom VARCHAR(40), @reg int,
-@resultado nvarchar(50) output
+@nom VARCHAR(40), @reg int
 AS
 DECLARE @resultado nvarchar(100)
 begin
@@ -790,7 +788,7 @@ begin
 		return
 	end
 	UPDATE PAIS SET  
-       [Uk_Nombre] = @nom,
+       [Uk_Pais_Nombre] = @nom,
 	   [Fk_Region_Pais_RegionId]= @reg
        WHERE Pk_Pais_Id= @id
 	   SET @resultado='Actualizacion Exitosa'
@@ -913,7 +911,7 @@ AS
 	END
 
 	INSERT INTO EMPLEADO 
-	(Tipo_Doc_Identidad,Uk_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono)
+	(Tipo_Doc_Identidad,Uk_Empleado_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono)
 	VALUES
 	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono)
 
@@ -1006,7 +1004,7 @@ AS
 	END
 
 	UPDATE EMPLEADO 
-	SET Tipo_Doc_Identidad = @Type_document, Uk_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono
+	SET Tipo_Doc_Identidad = @Type_document, Uk_Empleado_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono
 	WHERE Pk_Empleado_Id = @EmpleadoId
 	SET @Mensaje = 'Datos Actualizados Correctamente'
 
@@ -1047,7 +1045,7 @@ FOR DELETE
 as
 	INSERT INTO EMPLEADO_HISTORIAL(Empleado_Id, Tipo_Doc_Identidad, Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono)
 	SELECT 
-	Pk_Empleado_Id, Tipo_Doc_Identidad, Uk_Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono
+	Pk_Empleado_Id, Tipo_Doc_Identidad, Uk_Empleado_Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono
 	FROM DELETED
 Go
 
@@ -1096,7 +1094,7 @@ Go
 --			Inserción de Datos(Para Prueba)
 --=================================================
 
-/*
+
 INSERT 
 INTO PUESTO 
 VALUES
@@ -1136,10 +1134,12 @@ VALUES
 GO
 
 insert into EMPLEADO_CONTRATOS
-values(1,'22-07-2021', '22-08-2022', 950, 500, 1, 1)
+values(1,'2021-07-22', '2022-08-22', 950, 500, 1, 1)
 go
 
-*/
+select * from EMPLEADO_CONTRATOS
+
+
 
 --(Rosales)Modificaciones Realizadas(Borrar este comentario)
 
