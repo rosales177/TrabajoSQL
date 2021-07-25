@@ -442,42 +442,49 @@ go
 drop proc if exists sp_insertardepartamento
 go
 create proc sp_insertardepartamento
-	@depa nvarchar(50), @nom nvarchar(50), 
-	@S_D_SuId int, @resultado nvarchar(80)
+	--@depa nvarchar(50), 
+	@nom nvarchar(50), 
+	@S_D_SuId int, @resultado nvarchar(80) output
 as
 begin
-if @depa is null or len(@depa)< 10 or len(@depa)>10
-	begin
-	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
-	return
-end
-if @nom is null or len(@nom)=0
-	begin
-	set @resultado='El nombre ingresado no es valido'
-	return
-end
--- Gente esta restriccion lo busque en inter y me parecio una manera
--- chevere de controlar el unique ya que si se ingresa dos veces un mismo nombre el sql botara error 
--- y eso es lo no queremos creo sino que bote el porque error
--- pero la cosa es que no logro hacer que de o como seria?
--- a la hora de hacer un insert con un mismo departamento ya ingresado bota error o tendra algo que ver con la tabla sucursal?
--- porque haciendo la tabla sucursal recien me eh dado cuenta de esto
-if exists (select Uk_Nombre from DEPARTAMENTO where Uk_Nombre = ltrim(rtrim(@nom)))
-    begin 
-		set @resultado=('Error -998: El registro ya existe.')
+	/*if @depa is null or len(@depa)< 10 or len(@depa)>10
+		begin
+		set @resultado ='¡Id Departamento invalido! Id 10 digitos'
 		return
-    end
-if @depa is null or len(@S_D_Suid)< 10 or len(@S_D_Suid)>10
-	begin
-	set @resultado ='¡Id Departamento invalido! Id 10 digitos'
-	return
-end
-exec sp_insertardepartamento
-insert into DEPARTAMENTO (Pk_Departamento_Id, Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
-values (@depa, @nom, @S_D_SuId)
-set @resultado = 'Registro Insertado'
+	end*/
+
+	--(MATOS)>	El id creo que no se debe comprobar porque ya lleva identity y aumenta solo
+	--			Por ahora solo lo he comentado y borre las variables, el otro problema era al comprobar el Id de sucursal
+	--			Porque el codigo que puso geraldo si funciona
+	--------------------------------------------------------------
+	if @nom is null or len(@nom)=0
+		begin
+		set @resultado='El nombre ingresado no es valido'
+		return
+	end
+	-- Gente esta restriccion lo busque en inter y me parecio una manera
+	-- chevere de controlar el unique ya que si se ingresa dos veces un mismo nombre el sql botara error 
+	-- y eso es lo no queremos creo sino que bote el porque error
+	-- pero la cosa es que no logro hacer que de o como seria?
+	-- a la hora de hacer un insert con un mismo departamento ya ingresado bota error o tendra algo que ver con la tabla sucursal?
+	-- porque haciendo la tabla sucursal recien me eh dado cuenta de esto
+	if exists (select Uk_Nombre from DEPARTAMENTO where Uk_Nombre = ltrim(rtrim(@nom)))
+		begin 
+			set @resultado=('Error -998: El registro ya existe.')
+			return
+		end
+	if @S_D_SuId is null or @S_D_SuId=0/*(@S_D_Suid)< 10 or len(@S_D_Suid)>10*/
+		begin
+		set @resultado ='¡Id Sucursal invalido! Id 10 digitos'
+		return
+	end
+
+	insert into DEPARTAMENTO (Uk_Nombre, Fk_Sucursal_Departamento_SucursalId)
+	values (@nom, @S_D_SuId)
+	set @resultado = 'Registro Insertado'
 end
 go
+
 
 
 --=========REGION========
@@ -997,11 +1004,10 @@ VALUES
 ('Av.Tomas Marzano #2156','Lima','Lima',1)
 GO
 
-
 INSERT 
 INTO DEPARTAMENTO
 VALUES 
-('Administración2',1)
+('Administración',1)
 GO
 
 INSERT 
@@ -1014,5 +1020,19 @@ GO
 insert into EMPLEADO_CONTRATOS
 values(1,'22-07-2021', '22-08-2022', 950, 500, 1, 1)
 go
-*/
 
+
+--================================================
+--	Comprobando el funcionamiento de los sp_
+--================================================
+
+
+Select * from DEPARTAMENTO;
+
+declare @mensaje varchar(50)
+exec sp_insertardepartamento 'Reparaciones', 1, @mensaje output
+select @mensaje
+go
+
+
+*/
