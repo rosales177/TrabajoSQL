@@ -6,7 +6,6 @@ go
 DROP DATABASE IF EXISTS RH_VENTAS
 go
 
-
 CREATE DATABASE RH_VENTAS
 ON PRIMARY    
 (
@@ -308,11 +307,12 @@ go
 
 ALTER TABLE EMPLEADO_CONTRATOS
 DROP CONSTRAINT IF EXISTS Fk_Puesto_EmpleadoContratos_PuestoId
-
+Go
 
 ALTER TABLE EMPLEADO_CONTRATOS
 ADD CONSTRAINT Fk_Puesto_EmpleadoContratos_PuestoId FOREIGN KEY(Fk_Puesto_EmpleadoContratos_PuestoId)
 REFERENCES PUESTO(Pk_Puesto_Id)
+Go
 
 ALTER TABLE EMPLEADO_CONTRATOS
 DROP CONSTRAINT if  exists Fk_Departamento_EmpleadoContratos_DepartamentoId
@@ -423,6 +423,7 @@ as
 	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Password),@Estado,@EmpleadoId)
 	Print @Mensaje
 Go
+
  ----------SELECT WHERE----------------
  
 DROP PROC IF EXISTS sp_Select_Usuario
@@ -500,6 +501,18 @@ as
 	DELETE FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID
 	PRINT @EmpleadoId
 go
+
+-------------------FUNCTION SHOWPASS------------------------------
+DROP FUNCTION IF EXISTS dbo.ShowPass
+GO
+CREATE FUNCTION ShowPass (@Pass varbinary(8000),@Frase nvarchar(20))
+RETURNS nvarchar(20)
+AS BEGIN
+	DECLARE @Password nvarchar(20);
+	SET @Password = CONVERT(nvarchar(20),DECRYPTBYPASSPHRASE(@Frase,@Pass))
+	RETURN @Password
+END
+GO
 
 
 --======================================
@@ -849,6 +862,318 @@ SET @resultado='Eliminacion Exitosa'
 PRINT @resultado
 GO
 
+--=========================================================
+--				  CRUD EMPLEADO_CONTRATOS
+--=========================================================
+
+------------------INSERT EMPLEADO_CONTRATOS----------------
+DROP PROC IF EXISTS sp_Insert_EmpleadoContratos
+GO
+CREATE PROC sp_Insert_EmpleadoContratos
+@EmpleadoId int,
+@FechaI date,
+@FechaF date,
+@Sueldo_Basico decimal(8,2),
+@Comision_vta decimal(8,2),
+@PuestoId int,
+@Departamento int
+AS
+	DECLARE @Mensaje nvarchar(100)
+
+	IF(@EmpleadoId is null or LEN(@EmpleadoId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @EmpleadoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	IF(@FechaI is null or LEN(@FechaI) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @FechaI, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@FechaF is null or LEN(@FechaF) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @FechaF, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Sueldo_Basico is null or LEN(@Sueldo_Basico) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Sueldo_Basico, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Comision_vta is null or LEN(@Comision_vta) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Comision_vta, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@PuestoId is null or LEN(@PuestoId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @PuestoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Departamento is null or LEN(@Departamento) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Departamento, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	INSERT INTO EMPLEADO_CONTRATOS VALUES (@EmpleadoId,@FechaI,@FechaF,@Sueldo_Basico,@Comision_vta,@PuestoId,@Departamento)
+	PRINT @Mensaje
+GO 
+---------------SELECTE WHERE EMPLEADO_CONTRATOS------------
+DROP PROC IF EXISTS sp_SelectWhere_EmpleadoContratos
+GO
+CREATE PROC sp_SelectWhere_EmpleadoContratos
+@ContratoId int 
+AS
+	DECLARE @Mensaje nvarchar(100)
+	IF(@ContratoId is null or LEN(@ContratoId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @ContratoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	SELECT * FROM EMPLEADO_CONTRATOS WHERE Pk_Contrato_Id = @ContratoId
+	PRINT @Mensaje
+GO
+-------------------UPDATE EMPLEADO_CONTRATOS---------------
+DROP PROC IF EXISTS sp_Update_EmpleadoContratos
+GO
+CREATE PROC sp_Update_EmpleadoContratos
+@ContratoId int,
+@EmpleadoId int,
+@FechaI date,
+@FechaF date,
+@Sueldo_Basico decimal(8,2),
+@Comision_vta decimal(8,2),
+@PuestoId int,
+@Departamento int
+AS
+	DECLARE @Mensaje nvarchar(100)
+	IF(@ContratoId is null or LEN(@ContratoId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @ContratoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@EmpleadoId is null or LEN(@EmpleadoId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @EmpleadoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	IF(@FechaI is null or LEN(@FechaI) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @FechaI, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@FechaF is null or LEN(@FechaF) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @FechaF, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Sueldo_Basico is null or LEN(@Sueldo_Basico) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Sueldo_Basico, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Comision_vta is null or LEN(@Comision_vta) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Comision_vta, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@PuestoId is null or LEN(@PuestoId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @PuestoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Departamento is null or LEN(@Departamento) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Departamento, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	SET @Mensaje = 'Datos Actualizados Correctamente'
+	
+	UPDATE EMPLEADO_CONTRATOS SET Fk_Empleado_EmpleadoContratos_EmpleadoId= @EmpleadoId,Fecha_Inicio= @FechaI,Fecha_Termino=@FechaF,Sueldo_Basico = @Sueldo_Basico, Comision_vta=@Comision_vta,Fk_Puesto_EmpleadoContratos_PuestoId = @PuestoId , Fk_Departamento_EmpleadoContratos_DepartamentoId = @Departamento 
+	WHERE Pk_Contrato_Id = @ContratoId
+
+	PRINT @Mensaje
+GO
+-------------------DELETE EMPLEADO_CONTRATOS--------------
+DROP PROc IF EXISTS sp_Delete_EmpleadoContratos
+GO
+CREATE PROC sp_Delete_EmpleadoContratos
+@ContratoId int 
+AS
+	DECLARE @Mensaje nvarchar(100)
+	IF(@ContratoId is null or LEN(@ContratoId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @ContratoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	DELETE FROM EMPLEADO_CONTRATOS WHERE Pk_Contrato_Id = @ContratoId
+	PRINT @Mensaje
+GO
+
+
+--==============================================
+--				CRUD SUCURSAL
+--==============================================
+
+------------INSERTAR SUCURSAL--------------------
+
+DROP PROC IF EXISTS sp_Insertar_Sucursal
+GO
+CREATE PROC sp_Insertar_Sucursal
+@Direccion nvarchar(50),
+@Distrito nvarchar(30),
+@Provincia nvarchar(50),
+@PaisId int
+AS
+	DECLARE @Mensaje nvarchar(100);
+	IF(@Direccion is null or LEN(@Direccion) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Direccion, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Distrito is null or LEN(@Distrito) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Distrito, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Provincia is null or LEN(@Provincia) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Provincia, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@PaisId is null or LEN(@PaisId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @PaisId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	INSERT INTO SUCURSAL (Direccion,Distrito,Provincia,Fk_Pais_Sucursal_PaisId)
+	VALUES (@Direccion,@Distrito,@Provincia,@PaisId)
+
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	Print @Mensaje
+
+GO
+
+------------SELECT WHERE SUCURSAL----------------
+
+DROP PROC IF EXISTS sp_ListarWhere_Sucursal
+GO
+CREATE PROC sp_ListarWhere_Sucursal
+@SucursalId int
+AS
+	DECLARE @Mensaje nvarchar(100);
+
+	IF(@SucursalId is null or LEN(@SucursalId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @SucursalId, fuera de rango o nulo '
+		PRINT @Mensaje
+		RETURN
+	END
+	SELECT * FROM SUCURSAL WHERE Pk_Sucursal_Id = @SucursalId
+GO
+
+------------UPDATE SUCURSAL---------------
+
+DROP PROC IF EXISTS sp_Update_Sucursal
+GO
+CREATE PROC sp_Update_Sucursal
+@SucursalId int,
+@Direccion nvarchar(50),
+@Distrito nvarchar(30),
+@Provincia nvarchar(50),
+@PaisId int
+AS
+	DECLARE @Mensaje nvarchar(100);
+	IF(@SucursalId is null or LEN(@SucursalId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @SucursalId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Direccion is null or LEN(@Direccion) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Direccion, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Distrito is null or LEN(@Distrito) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Distrito, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Provincia is null or LEN(@Provincia) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Provincia, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@PaisId is null or LEN(@PaisId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @PaisId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	UPDATE SUCURSAL SET Direccion = @Direccion, Distrito = @Distrito, Provincia = @Provincia,Fk_Pais_Sucursal_PaisId = @PaisId
+	WHERE Pk_Sucursal_Id = @SucursalId
+	
+	SET @Mensaje = 'Datos Actualizados Correctamente'
+	Print @Mensaje
+
+GO
+------------DELETE SUCURSAL----------------
+DROP PROC IF EXISTS sp_Delete_Sucursal
+GO
+CREATE PROC sp_Delete_Sucursal
+@SucursalId int
+AS
+	DECLARE @Mensaje nvarchar(100);
+
+	IF(@SucursalId is null or LEN(@SucursalId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @SucursalId, fuera de rango o nulo '
+		PRINT @Mensaje
+		RETURN
+	END
+	
+	DELETE SUCURSAL WHERE Pk_Sucursal_Id = @SucursalId
+	SET @Mensaje = 'Datos Eliminados Correctamente'
+	Print @Mensaje
+	
+GO
+
+
+
 --===========================================
 --           CRUD Tabla EMPLEADO
 --==========================================
@@ -863,7 +1188,8 @@ CREATE PROC sp_Insertar_Empleado
 @Apellido nvarchar(40),
 @Email nvarchar(50),
 @Nacionalidad nvarchar(40),
-@telefono nvarchar(20)
+@telefono nvarchar(20),
+@SupervisorId int
 
 AS
 	DECLARE @Mensaje nvarchar(200) 
@@ -909,11 +1235,17 @@ AS
 		print @Mensaje
 		RETURN
 	END
+	IF(@SupervisorId is null or len(@SupervisorId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo telefono el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
 
 	INSERT INTO EMPLEADO 
-	(Tipo_Doc_Identidad,Uk_Empleado_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono)
+	(Tipo_Doc_Identidad,Uk_Empleado_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono,Fk_Empleado_Empleado_SupervisorId)
 	VALUES
-	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono)
+	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono,@SupervisorId)
 
 	SET @Mensaje = 'Datos Insertados Correctamente'
 
@@ -950,7 +1282,8 @@ CREATE PROC sp_Update_Empleado
 @Apellido nvarchar(40),
 @Email nvarchar(50),
 @Nacionalidad nvarchar(40),
-@telefono nvarchar(20)
+@telefono nvarchar(20),
+@SupervisorId int
 
 AS
 	DECLARE @Mensaje nvarchar(200) 
@@ -1002,9 +1335,15 @@ AS
 		print @Mensaje
 		RETURN
 	END
+	IF(@SupervisorId is null or len(@SupervisorId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en el campo supervisor el dato ingresado es nulo o fuera de rango'
+		print @Mensaje
+		RETURN
+	END
 
 	UPDATE EMPLEADO 
-	SET Tipo_Doc_Identidad = @Type_document, Uk_Empleado_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono
+	SET Tipo_Doc_Identidad = @Type_document, Uk_Empleado_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono, Fk_Empleado_Empleado_SupervisorId=@SupervisorId
 	WHERE Pk_Empleado_Id = @EmpleadoId
 	SET @Mensaje = 'Datos Actualizados Correctamente'
 
@@ -1088,80 +1427,45 @@ as
 
 Go
 
---------------push prueba------------------------
-
 --================================================
 --			Inserción de Datos(Para Prueba)
 --=================================================
 
 
-INSERT 
-INTO PUESTO 
-VALUES
-('Administrador',1500,930)
+EXEC sp_InsertarPuesto 'Contaduria',4500.50,930.90
 GO
 
-INSERT
-INTO REGION
-VALUES
-('Sur America')
+EXEC sp_InsertarRegion 'Asia'
 GO
 
+EXEC sp_InsertarPais 'Argentina',2 
+Go
 
-INSERT 
-INTO PAIS
-VALUES
-('PERU',1)
+EXEC sp_Insertar_Sucursal 'Av.La Perla  #258','Callao','Lima',1
 GO
 
-INSERT 
-INTO SUCURSAL
-VALUES
-('Av.Tomas Marzano #2156','Lima','Lima',1)
+EXEC sp_insertardepartamento 'Contaduria',1
 GO
 
-INSERT 
-INTO DEPARTAMENTO
-VALUES 
-('Administración',1)
+EXEC sp_Insertar_Empleado 'DNI','98653214','Jose Andres','Lopez Martines','lopes@gmail.com','Peruana','986532145'
 GO
 
-INSERT 
-INTO EMPLEADO
-VALUES
-
-('DNI','74889652','Jose Antonio','Robles Bermejo','bermejontio@gmail.com','Peruana','985642138',1)
+EXEC sp_Insert_EmpleadoContratos 1,'2021-07-22', '2022-08-22', 1800, 930, 1, 1
 GO
 
-insert into EMPLEADO_CONTRATOS
-values(1,'2021-07-22', '2022-08-22', 950, 500, 1, 1)
-go
-
-select * from EMPLEADO_CONTRATOS
-
-
-
---(Rosales)Modificaciones Realizadas(Borrar este comentario)
+Exec sp_insert_Usuario 'Juancho177','admin1234','T',1
+GO
 
 /*
-	-Se creo el Foreign Key de Puesto a Empleados_Contratos ya que no existia
+(ROSALES) Modificaciónes realizadas :
 
-	-Se modifico la nomenclatura de los Unique Key
+	- Se crearon los CRUD de las tablas Sucursal, Empleado_Contratos
 
-			de Uk_NombreCampo a Uk_Tabla_NombreCampo
+	- Se Provaron los sp_insert de las tablas, se remplazaron por los insert tradicionales
 
-	--Se Agregaron los comentarios correspondiente
+	- Se creo la funcion que desencriptar los password de la tabla Usuario
 
-	-Los Procedimientos almacenados que contenian variables de salida fueron modificadas para que el mensaje
-	fuera mostrado al ejecutar el Sp
+	- Example : SELECT dbo.ShowPass(Pass,'TOPSECRET') 'Password' FROM USUARIO 
 
-	Remplazando el output por variables locales
-
-	Ejemplo 
-
-	Ejecutar.....
-
-	exec sp_insertardepartamento 'Almacen', 1
-
-
+	--PROBAR SI CORRE 
 */
