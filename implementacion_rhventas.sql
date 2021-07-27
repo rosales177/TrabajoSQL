@@ -697,7 +697,11 @@ CREATE PROCEDURE sp_SeleccionaDepartamento
 @id int
 AS
 DECLARE @resultado nvarchar(100)
-SELECT * FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
+	SELECT Pk_Departamento_ID, Uk_Departamento_Nombre 'Nombre', tb2.Distrito 'Sucursal'
+	FROM DEPARTAMENTO AS tb1 
+	JOIN SUCURSAL AS tb2 
+	ON(tb1.Fk_Sucursal_Departamento_SucursalId = tb2.Pk_Sucursal_Id) 
+	WHERE Pk_Departamento_ID = @id
 SET @resultado='Seleccion Exitosa'
 PRINT @resultado
 GO
@@ -717,6 +721,26 @@ SET @resultado='Seleccion Exitosa'
 PRINT @resultado
 GO
 
+----------PAIS-----------------
+DROP PROC IF EXISTS sp_Select_Pais
+GO
+CREATE PROC sp_Select_Pais
+@PaisId int
+AS
+	DECLARE @Mensaje nvarchar(100)
+	IF(@PaisId is null or LEN(@PaisId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @PaisId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	SELECT Pk_Pais_Id,Uk_Pais_Nombre 'Nombre', Uk_Region_Nombre 'Región' FROM 
+	PAIS AS tb1 
+	JOIN REGION AS tb2 
+	ON(tb1.Fk_Region_Pais_RegionId=tb2.Pk_Region_Id)
+	WHERE Pk_Pais_Id = @PaisId
+GO
 --======================================
 --======== UPDATE PROCEDURE
 --======================================
@@ -893,7 +917,28 @@ DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
 PRINT @resultado
 GO
+SELECT * FROM PAIS
 
+-----------VIEW PAIS-------------
+
+CREATE VIEW vp_Select_Pais
+AS
+
+	SELECT Pk_Pais_Id,Uk_Pais_Nombre 'Nombre', Uk_Region_Nombre 'Región' FROM 
+	PAIS AS tb1 
+	JOIN REGION AS tb2 
+	ON(tb1.Fk_Region_Pais_RegionId=tb2.Pk_Region_Id)
+GO
+
+----------VIEW DEPARTAMENTO---------------
+
+CREATE VIEW vp_Select_Departamento
+AS
+	SELECT Pk_Departamento_ID, Uk_Departamento_Nombre 'Nombre', tb2.Distrito 'Sucursal'
+	FROM DEPARTAMENTO AS tb1 
+	JOIN SUCURSAL AS tb2 
+	ON(tb1.Fk_Sucursal_Departamento_SucursalId = tb2.Pk_Sucursal_Id)	
+GO
 --=========================================================
 --				  CRUD EMPLEADO_CONTRATOS
 --=========================================================
@@ -1066,6 +1111,18 @@ AS
 	PRINT @Mensaje
 GO
 
+-----------------VIEW EMPLEADO_CONTRATOS--------------
+CREATE VIEW vp_Select_EmpleadoContratos
+AS
+	SELECT Pk_Contrato_Id, CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido',Fecha_Inicio,Fecha_Termino,Sueldo_Basico,Comision_vta,tb3.Nombre,tb4.Uk_Departamento_Nombre 'Departamento' 
+	FROM EMPLEADO_CONTRATOS AS tb1 
+	JOIN EMPLEADO AS tb2 
+	ON(tb1.Fk_Empleado_EmpleadoContratos_EmpleadoId = tb2.Pk_Empleado_Id)
+	JOIN PUESTO AS tb3
+	ON(tb1.Fk_Puesto_EmpleadoContratos_PuestoId = tb3.Pk_Puesto_Id)
+	JOIN DEPARTAMENTO AS tb4
+	ON(tb1.Fk_Departamento_EmpleadoContratos_DepartamentoId = tb4.Pk_Departamento_ID)
+GO
 
 --==============================================
 --				CRUD SUCURSAL
@@ -1130,7 +1187,11 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
-	SELECT * FROM SUCURSAL WHERE Pk_Sucursal_Id = @SucursalId
+	SELECT Pk_Sucursal_Id,Direccion,Distrito,Provincia,tb2.Uk_Pais_Nombre 'País' 
+	FROM SUCURSAL AS tb1 
+	JOIN PAIS AS tb2 
+	ON(tb1.Fk_Pais_Sucursal_PaisId = tb2.Pk_Pais_Id) 
+	WHERE Pk_Sucursal_Id = @SucursalId
 GO
 
 ------------UPDATE SUCURSAL---------------
@@ -1204,6 +1265,14 @@ AS
 	
 GO
 
+------------------VIEW SUCURSAL------------------
+CREATE VIEW vp_Select_Sucursal
+AS
+	SELECT Pk_Sucursal_Id,Direccion,Distrito,Provincia,tb2.Uk_Pais_Nombre 'País' 
+	FROM SUCURSAL AS tb1 
+	JOIN PAIS AS tb2 
+	ON(tb1.Fk_Pais_Sucursal_PaisId = tb2.Pk_Pais_Id)
+GO
 
 --=================================================
 --				  CRUD SUPERVISOR
@@ -1254,7 +1323,12 @@ AS
 		RETURN
 	END
 
-	SELECT * FROM SUPERVISOR WHERE PK_supervisorId = @SupervisorId
+	SELECT PK_supervisorId 'Supervisor ID', CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido', tb3.Uk_Departamento_Nombre 'Supervisor'
+	FROM SUPERVISOR AS tb1 
+	JOIN EMPLEADO AS tb2 on
+	(tb1.FK_Empleado_Supervisor_EmpleadoId = tb2.Pk_Empleado_Id)
+	JOIN DEPARTAMENTO AS tb3 on
+	(tb1.FK_Departamento_Supervisor_DepartarmentoId = tb3.Pk_Departamento_ID) WHERE PK_supervisorId = @SupervisorId
 GO
 
 ----------------UPDATE SUPERVISOR-----------------
@@ -1313,7 +1387,17 @@ AS
 	DELETE FROM SUPERVISOR WHERE Pk_supervisorId  = @SupervisorId
 	PRINT @Mensaje
 GO
+-------------View Supervisor--------------------
+CREATE VIEW vp_Select_Supervisor
+AS
+	SELECT PK_supervisorId 'Supervisor ID', CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido', tb3.Uk_Departamento_Nombre 'Supervisor'
+	FROM SUPERVISOR AS tb1 
+	JOIN EMPLEADO AS tb2 on
+	(tb1.FK_Empleado_Supervisor_EmpleadoId = tb2.Pk_Empleado_Id)
+	JOIN DEPARTAMENTO AS tb3 on
+	(tb1.FK_Departamento_Supervisor_DepartarmentoId = tb3.Pk_Departamento_ID)
 
+GO
 
 --===========================================
 --           CRUD Tabla EMPLEADO
@@ -1578,7 +1662,7 @@ GO
 EXEC sp_InsertarRegion 'Asia'
 GO
 
-EXEC sp_InsertarPais 'Argentina',1 
+EXEC sp_InsertarPais 'Perú',1 
 GO
 
 EXEC sp_Insertar_Sucursal 'Av.La Perla  #258','Callao','Lima',1
@@ -1605,4 +1689,24 @@ GO
 	- Se creó la restricción FOREIGN KEY de la tabla EMPLEADO a Supervisor
 	
 	- Se creo El CRUD de la tabla Supervisor
+	- Se Crearon los View de las tablas que contenian Fk, haciendo un join por cada Fk
+	
+	Comprobar:
+	Select * from vp_Select_EmpleadoContratos
+	GO
+	SELECT * FROM vp_Select_Supervisor
+	GO
+	SELECT * FROM vp_Select_Pais
+	GO
+	SELECT * FROM vp_Select_Sucursal
+	GO
+	SELECT * FROM vp_Select_Departamento
+	GO
+	SELECT * FROM EMPLEADO
+	GO
+	SELECT * FROM PUESTO
+	GO
+	SELECT * FROM USUARIO
+	GO
 */
+
