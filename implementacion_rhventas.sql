@@ -576,6 +576,44 @@ end
 
 go
 
+--========SUCURSAL==========
+
+drop procedure if exists sp_insertarSucursal
+go
+create procedure sp_insertarSucursal 
+@direccion nvarchar(60), 
+@distrito nvarchar(20),
+@provincia nvarchar(40),
+@paisid int,
+@resultado nvarchar(50)
+as
+begin
+    if @direccion is null or len(@direccion) = 0
+	begin 
+		set @resultado='Ingrese una Dirección'
+		return
+	end
+	if @distrito is null or len(@direccion) = 0
+	begin 
+		set @resultado='Ingrese un distrito'
+		return
+	end
+	if @provincia is null or len(@direccion) = 0
+	begin 
+		set @resultado='Ingrese una provincia'
+		return
+	end
+	if exists (select Fk_Pais_Sucursal_PaisId from SUCURSAL where Fk_Pais_Sucursal_PaisId = ltrim(rtrim(@paisid)))
+    begin 
+		set @resultado=('Error -998: El registro ya existe.')
+		return
+    end
+insert SUCURSAL(Direccion, Distrito, Provincia, Fk_Pais_Sucursal_PaisId) 
+values(@direccion, @distrito, @provincia, @paisid)
+set @resultado='Registro Insertado'
+PRINT @resultado
+end
+go
 
 
 --=========REGION========
@@ -656,6 +694,18 @@ SET @resultado='Seleccion Exitosa'
 PRINT @resultado
 GO
 
+--========SUCURSAL========
+
+DROP PROCEDURE IF EXISTS sp_seleccionaSucursal
+GO
+CREATE PROCEDURE sp_seleccionaSucursal
+@id int,
+@resultado nvarchar(50)
+AS
+SELECT * FROM SUCURSAL WHERE Pk_Sucursal_Id = @id
+SET @resultado = 'Registro Seleccionado'
+PRINT(@resultado)
+GO
 
 --=========REGION========
 
@@ -743,6 +793,47 @@ if @nom is null or LEN(@nom)=0
 end
 GO
 
+--========SUCURSAL=========
+
+DROP PROCEDURE IF EXISTS sp_UpdateSucursal
+GO
+CREATE PROCEDURE sp_UpdateSucursal
+@id int,
+@direc nvarchar(50),
+@dist nvarchar(50),
+@prov nvarchar(50),
+@paisid int,
+@resultado nvarchar(50)
+AS
+begin
+	if @direc is null or len(@direc) = 0
+		begin 
+			set @resultado='Ingrese una Dirección'
+			return
+		end
+	if @dist is null or len(@dist) = 0
+		begin
+			set @resultado = 'Ingrese un Distrito'
+			return
+		end
+	if @prov is null or len(@prov) = 0
+		begin 
+			set @resultado = 'Ingrese una Provincia'
+			return
+		end
+	if exists (select Fk_Pais_Sucursal_PaisId from SUCURSAL where Fk_Pais_Sucursal_PaisId = ltrim(rtrim(@paisid)))
+		begin 
+			set @resultado=('Error -998: El registro ya existe.')
+			return
+		end
+	UPDATE SUCURSAL SET
+		[Direccion]= @direc,
+		[Distrito]= @dist,
+		[Provincia]= @prov
+		WHERE [Pk_Sucursal_Id] = @id
+		SET @resultado = 'Registro Actualizado'
+END 
+GO
 
 --=========REGION========
 DROP PROCEDURE if exists sp_UpdateRegion
@@ -825,6 +916,19 @@ SET @resultado='Eliminacion Exitosa'
 PRINT @resultado
 GO
 
+--=======SUCURSAL========
+
+DROP PROCEDURE IF EXISTS sp_deleteSucursal
+GO
+CREATE PROCEDURE sp_deleteSucursal
+@id int,
+@resultado nvarchar(50)
+AS
+BEGIN
+DELETE FROM SUCURSAL WHERE Pk_Sucursal_Id = @id
+SET @resultado = 'Elimnacion Exitosa'
+END
+GO
 
 --=========REGION========
 DROP PROCEDURE if exists sp_DeleteRegion
@@ -1117,7 +1221,7 @@ GO
 INSERT 
 INTO SUCURSAL
 VALUES
-('Av.Tomas Marzano #2156','Lima','Lima',1)
+('Av.Tomas Marzano #2156','Olivos','Lima',1)
 GO
 
 INSERT 
