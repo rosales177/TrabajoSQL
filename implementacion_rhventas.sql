@@ -182,7 +182,18 @@ CREATE TABLE EMPLEADO_CONTRATO_HISTORIAL
 GO
 
 
+--=======CREACION DE TABLA SUPERVISOR=========
 
+DROP TABLE IF EXISTS SUPERVISOR
+GO
+CREATE TABLE SUPERVISOR
+(
+PK_supervisorId int not null,
+FK_Empleado_Supervisor_EmpleadoId int not null,
+FK_Departamento_Supervisor_DepartarmentoId nvarchar(50) not null
+)
+
+GO
 /*---PRIMARY KEY---*/
 
 --NOMENCLATURA: Pk_NombreTabla_NombreCampo
@@ -250,6 +261,9 @@ ALTER TABLE EMPLEADO_CONTRATO_HISTORIAL
 ADD CONSTRAINT Pk_EmpleadoId_ContratoId PRIMARY KEY (Pk_Empleado_Id, Pk_Contrato_Id)
 go
 
+ALTER TABLE SUPERVISOR
+ADD PRIMARY KEY (PK_supervisorId)
+GO
 
 
 /*---FOREIGN KEYS---*/
@@ -322,6 +336,26 @@ ALTER TABLE EMPLEADO_CONTRATOS
 ADD CONSTRAINT Fk_Departamento_EmpleadoContratos_DepartamentoId FOREIGN KEY(Fk_Departamento_EmpleadoContratos_DepartamentoId)
 REFERENCES DEPARTAMENTO(Pk_Departamento_Id)
 go
+
+ALTER TABLE SUPERVISOR
+DROP CONSTRAINT if  exists FK_Empleado_Supervisor_EmpleadoId
+GO
+ALTER TABLE SUPERVISOR
+ADD CONSTRAINT FK_Empleado_Supervisor_EmpleadoId FOREIGN KEY(FK_Empleado_Supervisor_EmpleadoId)
+REFERENCES EMPLEADO(Pk_Empleado_Id)
+GO
+
+/* fALTA HACER ESTE ALTER NO ENTINEDO MUCHO LAS REFERENCIAS
+
+ALTER TABLE SUPERVISOR
+DROP CONSTRAINT IF exists FK_Departamento_Supervisor_DepartarmentoId
+GO
+ALTER TABLE SUPERVISOR
+ADD CONSTRAINT FK_Departamento_Supervisor_DepartarmentoId FOREIGN KEY(FK_Departamento_Supervisor_DepartarmentoId)
+REFERENCES DEPARTAMENTO(Pk_Departamento_ID)
+GO
+
+*/
 
 /*---UNIQUE KEY---*/
 
@@ -1478,4 +1512,13 @@ GO
 - Se corrigieron los errores debido de sintaxis y orden de insercion 
 - Se elimino o comento todo lo referente a Fk_Empleado_Empleado_SupervisorId que afectaba a la tabla
 - EMPLEADO ya botaba error porque debia haber datos insertados de antemano para poder ejecutarse  
+*/
+
+/*
+(Espinoza)
+- Se creo la tabla SUPERVIOR linea 185 creo
+- Se coloco el primary key a PK_supervisorId
+- Se altero la fk a FK_Empleado_Supervisor_EmpleadoId
+- FALTA  pONER fk a    FK_Departamento_Supervisor_DepartarmentoId no entendi a que tabla se
+ hacia la referencia
 */
