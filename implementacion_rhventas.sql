@@ -917,8 +917,6 @@ DELETE FROM PAIS WHERE Pk_Pais_Id = @id
 SET @resultado='Eliminacion Exitosa'
 PRINT @resultado
 GO
-SELECT * FROM PAIS
-GO
 -----------VIEW PAIS-------------
 
 CREATE VIEW vp_Select_Pais
