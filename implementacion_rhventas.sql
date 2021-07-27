@@ -188,9 +188,9 @@ DROP TABLE IF EXISTS SUPERVISOR
 GO
 CREATE TABLE SUPERVISOR
 (
-PK_supervisorId int not null,
+PK_supervisorId int not null identity(1,1),
 FK_Empleado_Supervisor_EmpleadoId int not null,
-FK_Departamento_Supervisor_DepartarmentoId nvarchar(50) not null
+FK_Departamento_Supervisor_DepartarmentoId int not null
 )
 
 GO
@@ -261,6 +261,9 @@ ALTER TABLE EMPLEADO_CONTRATO_HISTORIAL
 ADD CONSTRAINT Pk_EmpleadoId_ContratoId PRIMARY KEY (Pk_Empleado_Id, Pk_Contrato_Id)
 go
 
+ALTER TABLE SUPERVISOR
+DROP CONSTRAINT IF EXISTS PK_supervisorId
+GO
 ALTER TABLE SUPERVISOR
 ADD PRIMARY KEY (PK_supervisorId)
 GO
@@ -345,17 +348,13 @@ ADD CONSTRAINT FK_Empleado_Supervisor_EmpleadoId FOREIGN KEY(FK_Empleado_Supervi
 REFERENCES EMPLEADO(Pk_Empleado_Id)
 GO
 
-/* fALTA HACER ESTE ALTER NO ENTINEDO MUCHO LAS REFERENCIAS
-
 ALTER TABLE SUPERVISOR
-DROP CONSTRAINT IF exists FK_Departamento_Supervisor_DepartarmentoId
+DROP CONSTRAINT FK_Departamento_Supervisor_DepartarmentoId
 GO
 ALTER TABLE SUPERVISOR
 ADD CONSTRAINT FK_Departamento_Supervisor_DepartarmentoId FOREIGN KEY(FK_Departamento_Supervisor_DepartarmentoId)
 REFERENCES DEPARTAMENTO(Pk_Departamento_ID)
 GO
-
-*/
 
 /*---UNIQUE KEY---*/
 
@@ -1206,6 +1205,115 @@ AS
 GO
 
 
+--=================================================
+--				  CRUD SUPERVISOR
+--=================================================
+
+----------------INSERT SUPERVISOR------------------
+
+DROP PROC IF EXISTS sp_Insert_Supervisor
+GO
+CREATE PROC sp_Insert_Supervisor
+@EmpleadoId int,
+@Departamento int
+
+AS
+	DECLARE @Mensaje nvarchar(100);
+
+	IF(@EmpleadoId is null or LEN(@EmpleadoId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @EmpleadoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Departamento is null or LEN(@Departamento)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Departamento, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	INSERT INTO SUPERVISOR (FK_Empleado_Supervisor_EmpleadoId,FK_Departamento_Supervisor_DepartarmentoId)
+	VALUES (@EmpleadoId,@Departamento)
+	PRINT @Mensaje
+GO
+
+-------------SELECT WHERE SUPERVISOR---------------
+
+DROP PROC IF EXISTS sp_SelectWhere_Supervisor
+GO
+CREATE PROC sp_SelectWhere_Supervisor
+@SupervisorId int
+AS 
+	DECLARE @Mensaje nvarchar(100)
+
+	IF(@SupervisorId is null or LEN(@SupervisorId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @SupervisorId'
+		PRINT @Mensaje
+		RETURN
+	END
+
+	SELECT * FROM SUPERVISOR WHERE PK_supervisorId = @SupervisorId
+GO
+
+----------------UPDATE SUPERVISOR-----------------
+
+DROP PROC IF EXISTS sp_Update_Supervisor
+GO
+CREATE PROC sp_Update_Supervisor
+@SupervisorId int,
+@EmpleadoId int,
+@Departamento int
+
+AS
+	DECLARE @Mensaje nvarchar(100);
+	IF(@SupervisorId is null or LEN(@SupervisorId)= 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @SupervisorId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@EmpleadoId is null or LEN(@EmpleadoId)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @EmpleadoId, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	IF(@Departamento is null or LEN(@Departamento)=0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @Departamento, fuera de rango o nulo'
+		PRINT @Mensaje
+		RETURN
+	END
+	SET @Mensaje = 'Datos Insertados Correctamente'
+	UPDATE SUPERVISOR SET FK_Empleado_Supervisor_EmpleadoId = @EmpleadoId , FK_Departamento_Supervisor_DepartarmentoId = @Departamento
+	WHERE PK_supervisorId = @SupervisorId
+	PRINT @Mensaje
+GO
+
+---------------DELETE SUPERVISOR-----------------
+
+DROP PROC IF EXISTS sp_Delete_Supervisor
+GO
+CREATE PROC sp_Delete_Supervisor
+@SupervisorId int
+AS
+	DECLARE @Mensaje nvarchar(100)
+
+	IF(@SupervisorId is null or LEN(@SupervisorId) = 0)
+	BEGIN
+		SET @Mensaje = 'Error en la variable @SupervisorId, fuerade rango o nulo'
+		PRINT @Mensaje 
+		RETURN
+	END
+
+	SET @Mensaje = 'Datos Eliminados Correctamente'
+
+	DELETE FROM SUPERVISOR WHERE Pk_supervisorId  = @SupervisorId
+	PRINT @Mensaje
+GO
+
 
 --===========================================
 --           CRUD Tabla EMPLEADO
@@ -1476,12 +1584,6 @@ GO
 EXEC sp_Insertar_Sucursal 'Av.La Perla  #258','Callao','Lima',1
 GO
 
-
-INSERT 
-INTO SUCURSAL
-VALUES
-('Av.Tomas Marzano #2156','Olivos','Lima',1)
-
 EXEC sp_insertardepartamento 'Contaduria',1
 GO
 
@@ -1494,31 +1596,13 @@ GO
 Exec sp_insert_Usuario 'Juancho177','admin1234','T',1
 GO
 
-/*
-(ROSALES) Modificaciónes realizadas :
-
-	- Se crearon los CRUD de las tablas Sucursal, Empleado_Contratos
-
-	- Se Provaron los sp_insert de las tablas, se remplazaron por los insert tradicionales
-
-	- Se creo la funcion que desencriptar los password de la tabla Usuario
-
-	- Example : SELECT dbo.ShowPass(Pass,'TOPSECRET') 'Password' FROM USUARIO 
-
-	--PROBAR SI CORRE 
-*/
-/*
-(ESPINOZA y ROSALES)
-- Se corrigieron los errores debido de sintaxis y orden de insercion 
-- Se elimino o comento todo lo referente a Fk_Empleado_Empleado_SupervisorId que afectaba a la tabla
-- EMPLEADO ya botaba error porque debia haber datos insertados de antemano para poder ejecutarse  
-*/
+EXEC sp_Insert_Supervisor 1, 1
+GO
 
 /*
-(Espinoza)
-- Se creo la tabla SUPERVIOR linea 185 creo
-- Se coloco el primary key a PK_supervisorId
-- Se altero la fk a FK_Empleado_Supervisor_EmpleadoId
-- FALTA  pONER fk a    FK_Departamento_Supervisor_DepartarmentoId no entendi a que tabla se
- hacia la referencia
+(ROSALES) COMENTARIOS DE MODIFICACIÓN:
+
+	- Se creó la restricción FOREIGN KEY de la tabla EMPLEADO a Supervisor
+	
+	- Se creo El CRUD de la tabla Supervisor
 */
