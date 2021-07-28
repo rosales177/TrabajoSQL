@@ -349,7 +349,7 @@ REFERENCES EMPLEADO(Pk_Empleado_Id)
 GO
 
 ALTER TABLE SUPERVISOR
-DROP CONSTRAINT FK_Departamento_Supervisor_DepartarmentoId
+DROP CONSTRAINT IF EXISTS FK_Departamento_Supervisor_DepartarmentoId
 GO
 ALTER TABLE SUPERVISOR
 ADD CONSTRAINT FK_Departamento_Supervisor_DepartarmentoId FOREIGN KEY(FK_Departamento_Supervisor_DepartarmentoId)
@@ -918,10 +918,11 @@ SET @resultado='Eliminacion Exitosa'
 PRINT @resultado
 GO
 SELECT * FROM PAIS
-
+GO
 -----------VIEW PAIS-------------
 
 CREATE VIEW vp_Select_Pais
+
 AS
 
 	SELECT Pk_Pais_Id,Uk_Pais_Nombre 'Nombre', Uk_Region_Nombre 'Región' FROM 
@@ -1377,7 +1378,7 @@ AS
 
 	IF(@SupervisorId is null or LEN(@SupervisorId) = 0)
 	BEGIN
-		SET @Mensaje = 'Error en la variable @SupervisorId, fuerade rango o nulo'
+		SET @Mensaje = 'Error en la variable @SupervisorId, fuera de rango o nulo'
 		PRINT @Mensaje 
 		RETURN
 	END
@@ -1691,7 +1692,7 @@ GO
 	- Se creo El CRUD de la tabla Supervisor
 	- Se Crearon los View de las tablas que contenian Fk, haciendo un join por cada Fk
 	
-	Comprobar:
+	Comprobar: 
 	Select * from vp_Select_EmpleadoContratos
 	GO
 	SELECT * FROM vp_Select_Supervisor
@@ -1710,3 +1711,9 @@ GO
 	GO
 */
 
+/*ESPINOZA
+
+SE CORREGIERON LOS 3 ERRORES Y SE PROBO LOS SELECT
+TODOS CON RESPUESTA SATISFACTORIA
+
+*/
