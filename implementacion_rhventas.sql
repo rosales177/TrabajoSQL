@@ -165,14 +165,15 @@ GO
 ---TABLA EMPLEADO_CONTRATO_HISTORIAL
 DROP TABLE IF EXISTS EMPLEADO_CONTRATO_HISTORIAL
 GO
+
 CREATE TABLE EMPLEADO_CONTRATO_HISTORIAL
 (
 	Pk_Empleado_Id int not null,
 	Pk_Contrato_Id int not null,
 	Fecha_Inicio date not null,
 	Fecha_Termino date not null,
-	Sueldo_Basico decimal (6,2) not null,
-	Comision_Vta decimal(5,2)not null,
+	Sueldo_Basico decimal (8,2) not null,
+	Comision_Vta decimal(8,2)not null,
 	Puesto_Id int not null,
 	Departamento_Id int not null,
 	Años_Servicio int not null,
@@ -296,15 +297,6 @@ ALTER TABLE DEPARTAMENTO
 ADD CONSTRAINT Fk_Sucursal_Deparatamento_SucursalId FOREIGN KEY(Fk_Sucursal_Departamento_SucursalId)
 REFERENCES SUCURSAL(Pk_Sucursal_Id)
 go
-/*
-ALTER TABLE EMPLEADO
-DROP CONSTRAINT IF EXISTS Fk_Empleado_Empleado_SupervisorId
-go
-
-ALTER TABLE EMPLEADO
-ADD CONSTRAINT Fk_Empleado_Empleado_SupervisorId FOREIGN KEY(Fk_Empleado_Empleado_SupervisorId)
-REFERENCES EMPLEADO(Pk_Empleado_Id)
-go*/
 
 ALTER TABLE USUARIO
 DROP CONSTRAINT IF EXISTS Fk_Empleado_Usuario_EmpleadoId
@@ -454,8 +446,18 @@ as
 	END 
 	SET @Mensaje = 'Datos Insertados Correctamente'
 	Set @frase = 'TOPSECRET'
-	INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Password),@Estado,@EmpleadoId)
-	Print @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			INSERT INTO USUARIO VALUES (@Nombre,ENCRYPTBYPASSPHRASE(@frase,@Password),@Estado,@EmpleadoId)
+			COMMIT TRAN
+			Print @Mensaje
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción : '
+			Print @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
 Go
 
  ----------SELECT WHERE----------------
@@ -472,7 +474,17 @@ as
 		PRINT @Mensaje
 		RETURN
 	END
-	SELECT * FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID 
+	BEGIN TRAN
+		BEGIN TRY
+			SELECT * FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID 
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
 go
 
 -------------UPDATE-------------------
@@ -512,10 +524,21 @@ as
 	END 
 	SET @Mensaje = 'Datos Actualizados Correctamente'
 	Set @frase = 'TOPSECRET'
-	UPDATE USUARIO 
-	SET Pk_Nombre = @Nombre, Pass = ENCRYPTBYPASSPHRASE(@frase,@Password),Estado=@Estado 
-	WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoId
-	PRINT(@Mensaje)
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE USUARIO 
+			SET Pk_Nombre = @Nombre, Pass = ENCRYPTBYPASSPHRASE(@frase,@Password),Estado=@Estado 
+			WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoId
+			PRINT(@Mensaje)
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 GO
 
 -------------DELETE--------------------
@@ -527,13 +550,24 @@ as
 	DECLARE @Mensaje nvarchar(200);
 	IF(@EmpleadoId is null or LEN(@EmpleadoId)=0)
 	BEGIN
-		SET @EmpleadoId = 'Error en la variable @EmpleadoId, valor fuera de rango o nulo'
-		PRINT @EmpleadoId
+		SET @Mensaje = 'Error en la variable @EmpleadoId, valor fuera de rango o nulo'
+		PRINT @Mensaje
 		RETURN
 	END
-	SET @EmpleadoId = 'Datos eliminados correctamente'
-	DELETE FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoID
-	PRINT @EmpleadoId
+	SET @Mensaje = 'Datos eliminados correctamente'
+	BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM USUARIO WHERE Fk_Empleado_Usuario_EmpleadoId = @EmpleadoId
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 go
 
 -------------------FUNCTION SHOWPASS------------------------------
@@ -579,10 +613,21 @@ begin
 		print @resultado
 		return 
 	end
-	insert PUESTO(Nombre, Salario_Maximo, Salario_Minimo)
-	values(@nom, @smax, @smin)
-	set @resultado='Registro Insertado'
-	print @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			insert PUESTO(Nombre, Salario_Maximo, Salario_Minimo)
+			values(@nom, @smax, @smin)
+			set @resultado='Registro Insertado'
+			print @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 go
 
@@ -614,11 +659,21 @@ begin
 		PRINT @resultado
 		return
 	end
-
-	insert into DEPARTAMENTO (Uk_Departamento_Nombre, Fk_Sucursal_Departamento_SucursalId)
-	values (@nom, @S_D_SuId)
-	set @resultado = 'Registro Insertado'
-	PRINT @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			insert into DEPARTAMENTO (Uk_Departamento_Nombre, Fk_Sucursal_Departamento_SucursalId)
+			values (@nom, @S_D_SuId)
+			set @resultado = 'Registro Insertado'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 
 go
@@ -638,10 +693,21 @@ begin
 		PRINT @resultado
 		return
 	end
-	insert REGION(Uk_Region_Nombre)
-	values(@nom)
-	set @resultado='Registro Insertado'
-	PRINT @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			insert REGION(Uk_Region_Nombre)
+			values(@nom)
+			set @resultado='Registro Insertado'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 go
 
@@ -665,10 +731,21 @@ begin
 		PRINT @resultado
 		return
 	end
-	insert PAIS(Uk_Pais_Nombre,Fk_Region_Pais_RegionId)
-	values(@nom,@reg)
-	set @resultado='Registro Insertado'
-	PRINT @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			insert PAIS(Uk_Pais_Nombre,Fk_Region_Pais_RegionId)
+			values(@nom,@reg)
+			set @resultado='Registro Insertado'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 go
 
@@ -684,9 +761,20 @@ CREATE PROCEDURE sp_SeleccionaPuesto
 @id INT
 AS 
 DEClARE @resultado nvarchar(100)
-SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
-SET @resultado='Seleccion Exitosa'
-PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY
+			SELECT * FROM PUESTO WHERE Pk_Puesto_Id = @id
+			SET @resultado='Seleccion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+
 GO
 
 --=======DEPARTAMENTO=========
@@ -697,13 +785,25 @@ CREATE PROCEDURE sp_SeleccionaDepartamento
 @id int
 AS
 DECLARE @resultado nvarchar(100)
-	SELECT Pk_Departamento_ID, Uk_Departamento_Nombre 'Nombre', tb2.Distrito 'Sucursal'
-	FROM DEPARTAMENTO AS tb1 
-	JOIN SUCURSAL AS tb2 
-	ON(tb1.Fk_Sucursal_Departamento_SucursalId = tb2.Pk_Sucursal_Id) 
-	WHERE Pk_Departamento_ID = @id
-SET @resultado='Seleccion Exitosa'
-PRINT @resultado
+
+	BEGIN TRAN
+		BEGIN TRY
+			SELECT Pk_Departamento_ID, Uk_Departamento_Nombre 'Nombre', tb2.Distrito 'Sucursal'
+			FROM DEPARTAMENTO AS tb1 
+			JOIN SUCURSAL AS tb2 
+			ON(tb1.Fk_Sucursal_Departamento_SucursalId = tb2.Pk_Sucursal_Id) 
+			WHERE Pk_Departamento_ID = @id
+			SET @resultado='Seleccion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 GO
 
 
@@ -716,9 +816,20 @@ CREATE PROCEDURE sp_SeleccionaRegion
 @id INT
 AS 
 DECLARE @resultado nvarchar(100)
-SELECT * FROM REGION WHERE Pk_Region_Id = @id
-SET @resultado='Seleccion Exitosa'
-PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY
+			SELECT * FROM REGION WHERE Pk_Region_Id = @id
+			SET @resultado='Seleccion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+
 GO
 
 ----------PAIS-----------------
@@ -734,12 +845,22 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
-
-	SELECT Pk_Pais_Id,Uk_Pais_Nombre 'Nombre', Uk_Region_Nombre 'Región' FROM 
-	PAIS AS tb1 
-	JOIN REGION AS tb2 
-	ON(tb1.Fk_Region_Pais_RegionId=tb2.Pk_Region_Id)
-	WHERE Pk_Pais_Id = @PaisId
+	BEGIN TRAN
+		BEGIN TRY
+			SELECT Pk_Pais_Id,Uk_Pais_Nombre 'Nombre', Uk_Region_Nombre 'Región' FROM 
+			PAIS AS tb1 
+			JOIN REGION AS tb2 
+			ON(tb1.Fk_Region_Pais_RegionId=tb2.Pk_Region_Id)
+			WHERE Pk_Pais_Id = @PaisId
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 GO
 --======================================
 --======== UPDATE PROCEDURE
@@ -778,13 +899,24 @@ begin
 		PRINT @resultado
 		return 
 	end
-	UPDATE PUESTO SET  
-       [Nombre] = @nom,
-       [Salario_Maximo] = @smax,
-	   [Salario_Minimo] = @smin
-       WHERE Pk_Puesto_Id= @id
-	   SET @resultado='Actualizacion Exitosa'
-	PRINT @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE PUESTO SET  
+			[Nombre] = @nom,  
+			[Salario_Maximo] = @smax,
+			[Salario_Minimo] = @smin
+			WHERE Pk_Puesto_Id= @id
+			SET @resultado='Actualizacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 GO
 
@@ -805,12 +937,23 @@ if @nom is null or LEN(@nom)=0
 		PRINT @resultado
 		return
 	end
-	UPDATE DEPARTAMENTO SET  
-       [Uk_Departamento_Nombre] = @nom,
-	   [Fk_Sucursal_Departamento_SucursalId] = @S_D_SUID
-       WHERE Pk_Departamento_ID= @id
-	   SET @resultado='Actualizacion Exitosa'
-	   PRINT @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE DEPARTAMENTO SET  
+		   [Uk_Departamento_Nombre] = @nom,
+		   [Fk_Sucursal_Departamento_SucursalId] = @S_D_SUID
+		   WHERE Pk_Departamento_ID= @id
+		   SET @resultado='Actualizacion Exitosa'
+		   PRINT @resultado
+		   COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 GO
 
@@ -829,11 +972,22 @@ begin
 		PRINT @resultado
 		return
 	end
-	UPDATE REGION SET  
-       [Uk_Region_Nombre] = @nom
-       WHERE Pk_Region_Id= @id
-	   SET @resultado='Actualizacion Exitosa'
-	PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY
+			UPDATE REGION SET  
+			   [Uk_Region_Nombre] = @nom
+			   WHERE Pk_Region_Id= @id
+			   SET @resultado='Actualizacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 GO
 --=========PAIS========
@@ -857,12 +1011,23 @@ begin
 		PRINT @resultado
 		return
 	end
-	UPDATE PAIS SET  
-       [Uk_Pais_Nombre] = @nom,
-	   [Fk_Region_Pais_RegionId]= @reg
-       WHERE Pk_Pais_Id= @id
-	   SET @resultado='Actualizacion Exitosa'
-	PRINT @resultado
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE PAIS SET  
+			[Uk_Pais_Nombre] = @nom,
+			[Fk_Region_Pais_RegionId]= @reg
+			WHERE Pk_Pais_Id= @id
+			SET @resultado='Actualizacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN		
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 end
 GO
 
@@ -877,9 +1042,20 @@ CREATE PROCEDURE sp_DeletePuesto
 @id INT
 AS 
 DECLARE @resultado nvarchar(100)
-DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
-SET @resultado='Eliminacion Exitosa'
-PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM PUESTO WHERE Pk_Puesto_Id = @id
+			SET @resultado='Eliminacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+
 GO
 
 --=====DEPARTAMENTO========
@@ -890,9 +1066,20 @@ go
 @id INT
 AS 
 DECLARE @resultado nvarchar(100)
-DELETE FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
-SET @resultado='Eliminacion Exitosa'
-PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM DEPARTAMENTO WHERE Pk_Departamento_ID = @id
+			SET @resultado='Eliminacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+
 GO
 
 --=========REGION========
@@ -902,9 +1089,20 @@ CREATE PROCEDURE sp_DeleteRegion
 @id INT
 AS 
 DECLARE @resultado nvarchar(100)
-DELETE FROM REGION WHERE Pk_Region_Id = @id
-SET @resultado='Eliminacion Exitosa'
-PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM REGION WHERE Pk_Region_Id = @id
+			SET @resultado='Eliminacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+
 GO
 --=========PAIS========
 DROP PROCEDURE if exists sp_DeletePais
@@ -913,9 +1111,20 @@ CREATE PROCEDURE sp_DeletePais
 @id INT
 AS 
 DECLARE @resultado nvarchar(100)
-DELETE FROM PAIS WHERE Pk_Pais_Id = @id
-SET @resultado='Eliminacion Exitosa'
-PRINT @resultado
+BEGIN TRAN
+		BEGIN TRY			
+			DELETE FROM PAIS WHERE Pk_Pais_Id = @id
+			SET @resultado='Eliminacion Exitosa'
+			PRINT @resultado
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @resultado = 'Error en la transacción: '
+			PRINT @resultado
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+
 GO
 -----------VIEW PAIS-------------
 
@@ -999,10 +1208,20 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
-
-	SET @Mensaje = 'Datos Insertados Correctamente'
-	INSERT INTO EMPLEADO_CONTRATOS VALUES (@EmpleadoId,@FechaI,@FechaF,@Sueldo_Basico,@Comision_vta,@PuestoId,@Departamento)
-	PRINT @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			SET @Mensaje = 'Datos Insertados Correctamente'
+			INSERT INTO EMPLEADO_CONTRATOS VALUES (@EmpleadoId,@FechaI,@FechaF,@Sueldo_Basico,@Comision_vta,@PuestoId,@Departamento)
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 GO 
 ---------------SELECTE WHERE EMPLEADO_CONTRATOS------------
 DROP PROC IF EXISTS sp_SelectWhere_EmpleadoContratos
@@ -1017,9 +1236,20 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
-	SET @Mensaje = 'Datos Insertados Correctamente'
-	SELECT * FROM EMPLEADO_CONTRATOS WHERE Pk_Contrato_Id = @ContratoId
-	PRINT @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			SET @Mensaje = 'Datos Insertados Correctamente'
+			SELECT * FROM EMPLEADO_CONTRATOS WHERE Pk_Contrato_Id = @ContratoId
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 GO
 -------------------UPDATE EMPLEADO_CONTRATOS---------------
 DROP PROC IF EXISTS sp_Update_EmpleadoContratos
@@ -1087,10 +1317,21 @@ AS
 
 	SET @Mensaje = 'Datos Actualizados Correctamente'
 	
-	UPDATE EMPLEADO_CONTRATOS SET Fk_Empleado_EmpleadoContratos_EmpleadoId= @EmpleadoId,Fecha_Inicio= @FechaI,Fecha_Termino=@FechaF,Sueldo_Basico = @Sueldo_Basico, Comision_vta=@Comision_vta,Fk_Puesto_EmpleadoContratos_PuestoId = @PuestoId , Fk_Departamento_EmpleadoContratos_DepartamentoId = @Departamento 
-	WHERE Pk_Contrato_Id = @ContratoId
-
-	PRINT @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE EMPLEADO_CONTRATOS SET Fk_Empleado_EmpleadoContratos_EmpleadoId= @EmpleadoId,Fecha_Inicio= @FechaI,Fecha_Termino=@FechaF,Sueldo_Basico = @Sueldo_Basico, Comision_vta=@Comision_vta,Fk_Puesto_EmpleadoContratos_PuestoId = @PuestoId , Fk_Departamento_EmpleadoContratos_DepartamentoId = @Departamento 
+			WHERE Pk_Contrato_Id = @ContratoId
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 GO
 -------------------DELETE EMPLEADO_CONTRATOS--------------
 DROP PROc IF EXISTS sp_Delete_EmpleadoContratos
@@ -1106,21 +1347,32 @@ AS
 		RETURN
 	END
 	SET @Mensaje = 'Datos Insertados Correctamente'
-	DELETE FROM EMPLEADO_CONTRATOS WHERE Pk_Contrato_Id = @ContratoId
-	PRINT @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM EMPLEADO_CONTRATOS WHERE Pk_Contrato_Id = @ContratoId
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 GO
 
 -----------------VIEW EMPLEADO_CONTRATOS--------------
 CREATE VIEW vp_Select_EmpleadoContratos
-AS
-	SELECT Pk_Contrato_Id, CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido',Fecha_Inicio,Fecha_Termino,Sueldo_Basico,Comision_vta,tb3.Nombre,tb4.Uk_Departamento_Nombre 'Departamento' 
-	FROM EMPLEADO_CONTRATOS AS tb1 
-	JOIN EMPLEADO AS tb2 
-	ON(tb1.Fk_Empleado_EmpleadoContratos_EmpleadoId = tb2.Pk_Empleado_Id)
-	JOIN PUESTO AS tb3
-	ON(tb1.Fk_Puesto_EmpleadoContratos_PuestoId = tb3.Pk_Puesto_Id)
-	JOIN DEPARTAMENTO AS tb4
-	ON(tb1.Fk_Departamento_EmpleadoContratos_DepartamentoId = tb4.Pk_Departamento_ID)
+AS	
+			SELECT Pk_Contrato_Id, CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido',Fecha_Inicio,Fecha_Termino,Sueldo_Basico,Comision_vta,tb3.Nombre,tb4.Uk_Departamento_Nombre 'Departamento' 
+			FROM EMPLEADO_CONTRATOS AS tb1 
+			JOIN EMPLEADO AS tb2 
+			ON(tb1.Fk_Empleado_EmpleadoContratos_EmpleadoId = tb2.Pk_Empleado_Id)
+			JOIN PUESTO AS tb3
+			ON(tb1.Fk_Puesto_EmpleadoContratos_PuestoId = tb3.Pk_Puesto_Id)
+			JOIN DEPARTAMENTO AS tb4
+			ON(tb1.Fk_Departamento_EmpleadoContratos_DepartamentoId = tb4.Pk_Departamento_ID)
 GO
 
 --==============================================
@@ -1163,11 +1415,22 @@ AS
 		RETURN
 	END
 
-	INSERT INTO SUCURSAL (Direccion,Distrito,Provincia,Fk_Pais_Sucursal_PaisId)
-	VALUES (@Direccion,@Distrito,@Provincia,@PaisId)
-
-	SET @Mensaje = 'Datos Insertados Correctamente'
-	Print @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			INSERT INTO SUCURSAL (Direccion,Distrito,Provincia,Fk_Pais_Sucursal_PaisId)
+			VALUES (@Direccion,@Distrito,@Provincia,@PaisId)
+			SET @Mensaje = 'Datos Insertados Correctamente'
+			Print @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 
 GO
 
@@ -1186,11 +1449,23 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
-	SELECT Pk_Sucursal_Id,Direccion,Distrito,Provincia,tb2.Uk_Pais_Nombre 'País' 
-	FROM SUCURSAL AS tb1 
-	JOIN PAIS AS tb2 
-	ON(tb1.Fk_Pais_Sucursal_PaisId = tb2.Pk_Pais_Id) 
-	WHERE Pk_Sucursal_Id = @SucursalId
+	BEGIN TRAN
+		BEGIN TRY
+			SELECT Pk_Sucursal_Id,Direccion,Distrito,Provincia,tb2.Uk_Pais_Nombre 'País' 
+			FROM SUCURSAL AS tb1 
+			JOIN PAIS AS tb2 
+			ON(tb1.Fk_Pais_Sucursal_PaisId = tb2.Pk_Pais_Id) 
+			WHERE Pk_Sucursal_Id = @SucursalId
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 GO
 
 ------------UPDATE SUCURSAL---------------
@@ -1236,11 +1511,23 @@ AS
 		RETURN
 	END
 
-	UPDATE SUCURSAL SET Direccion = @Direccion, Distrito = @Distrito, Provincia = @Provincia,Fk_Pais_Sucursal_PaisId = @PaisId
-	WHERE Pk_Sucursal_Id = @SucursalId
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE SUCURSAL SET Direccion = @Direccion, Distrito = @Distrito, Provincia = @Provincia,Fk_Pais_Sucursal_PaisId = @PaisId
+			WHERE Pk_Sucursal_Id = @SucursalId
 	
-	SET @Mensaje = 'Datos Actualizados Correctamente'
-	Print @Mensaje
+			SET @Mensaje = 'Datos Actualizados Correctamente'
+			Print @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 
 GO
 ------------DELETE SUCURSAL----------------
@@ -1257,10 +1544,20 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
+	BEGIN TRAN
+		BEGIN TRY
+			DELETE SUCURSAL WHERE Pk_Sucursal_Id = @SucursalId
+			SET @Mensaje = 'Datos Eliminados Correctamente'
+			Print @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
 	
-	DELETE SUCURSAL WHERE Pk_Sucursal_Id = @SucursalId
-	SET @Mensaje = 'Datos Eliminados Correctamente'
-	Print @Mensaje
 	
 GO
 
@@ -1301,9 +1598,21 @@ AS
 		RETURN
 	END
 	SET @Mensaje = 'Datos Insertados Correctamente'
-	INSERT INTO SUPERVISOR (FK_Empleado_Supervisor_EmpleadoId,FK_Departamento_Supervisor_DepartarmentoId)
-	VALUES (@EmpleadoId,@Departamento)
-	PRINT @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			INSERT INTO SUPERVISOR (FK_Empleado_Supervisor_EmpleadoId,FK_Departamento_Supervisor_DepartarmentoId)
+			VALUES (@EmpleadoId,@Departamento)
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+
 GO
 
 -------------SELECT WHERE SUPERVISOR---------------
@@ -1321,13 +1630,24 @@ AS
 		PRINT @Mensaje
 		RETURN
 	END
-
-	SELECT PK_supervisorId 'Supervisor ID', CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido', tb3.Uk_Departamento_Nombre 'Supervisor'
-	FROM SUPERVISOR AS tb1 
-	JOIN EMPLEADO AS tb2 on
-	(tb1.FK_Empleado_Supervisor_EmpleadoId = tb2.Pk_Empleado_Id)
-	JOIN DEPARTAMENTO AS tb3 on
-	(tb1.FK_Departamento_Supervisor_DepartarmentoId = tb3.Pk_Departamento_ID) WHERE PK_supervisorId = @SupervisorId
+	BEGIN TRAN
+		BEGIN TRY
+			SELECT PK_supervisorId 'Supervisor ID', CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido', tb3.Uk_Departamento_Nombre 'Supervisor'
+			FROM SUPERVISOR AS tb1 
+			JOIN EMPLEADO AS tb2 on
+			(tb1.FK_Empleado_Supervisor_EmpleadoId = tb2.Pk_Empleado_Id)
+			JOIN DEPARTAMENTO AS tb3 on
+			(tb1.FK_Departamento_Supervisor_DepartarmentoId = tb3.Pk_Departamento_ID) WHERE PK_supervisorId = @SupervisorId
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 GO
 
 ----------------UPDATE SUPERVISOR-----------------
@@ -1360,9 +1680,21 @@ AS
 		RETURN
 	END
 	SET @Mensaje = 'Datos Insertados Correctamente'
-	UPDATE SUPERVISOR SET FK_Empleado_Supervisor_EmpleadoId = @EmpleadoId , FK_Departamento_Supervisor_DepartarmentoId = @Departamento
-	WHERE PK_supervisorId = @SupervisorId
-	PRINT @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE SUPERVISOR SET FK_Empleado_Supervisor_EmpleadoId = @EmpleadoId , FK_Departamento_Supervisor_DepartarmentoId = @Departamento
+			WHERE PK_supervisorId = @SupervisorId
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 GO
 
 ---------------DELETE SUPERVISOR-----------------
@@ -1382,20 +1714,31 @@ AS
 	END
 
 	SET @Mensaje = 'Datos Eliminados Correctamente'
+	BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM SUPERVISOR WHERE Pk_supervisorId  = @SupervisorId
+			PRINT @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
 
-	DELETE FROM SUPERVISOR WHERE Pk_supervisorId  = @SupervisorId
-	PRINT @Mensaje
+	
 GO
 -------------View Supervisor--------------------
 CREATE VIEW vp_Select_Supervisor
 AS
-	SELECT PK_supervisorId 'Supervisor ID', CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido', tb3.Uk_Departamento_Nombre 'Supervisor'
-	FROM SUPERVISOR AS tb1 
-	JOIN EMPLEADO AS tb2 on
-	(tb1.FK_Empleado_Supervisor_EmpleadoId = tb2.Pk_Empleado_Id)
-	JOIN DEPARTAMENTO AS tb3 on
-	(tb1.FK_Departamento_Supervisor_DepartarmentoId = tb3.Pk_Departamento_ID)
-
+			SELECT PK_supervisorId 'Supervisor ID', CONCAT(tb2.Nombre,' ',tb2.Apellido) 'Nombre y Apellido', tb3.Uk_Departamento_Nombre 'Supervisor'
+			FROM SUPERVISOR AS tb1 
+			JOIN EMPLEADO AS tb2 on
+			(tb1.FK_Empleado_Supervisor_EmpleadoId = tb2.Pk_Empleado_Id)
+			JOIN DEPARTAMENTO AS tb3 on
+			(tb1.FK_Departamento_Supervisor_DepartarmentoId = tb3.Pk_Departamento_ID)
 GO
 
 --===========================================
@@ -1458,22 +1801,24 @@ AS
 		print @Mensaje
 		RETURN
 	END
-/*	IF(@SupervisorId is null or len(@SupervisorId)=0)
-	BEGIN
-		SET @Mensaje = 'Error en el campo telefono el dato ingresado es nulo o fuera de rango'
-		print @Mensaje
-		RETURN
-	END
-*/
-	INSERT INTO EMPLEADO 
-	(Tipo_Doc_Identidad,Uk_Empleado_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono)
-	VALUES
-	(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono)
-
-	SET @Mensaje = 'Datos Insertados Correctamente'
-
-	Print @Mensaje
-
+	BEGIN TRAN
+		BEGIN TRY
+			INSERT INTO EMPLEADO 
+			(Tipo_Doc_Identidad,Uk_Empleado_Nro_Doc_Identidad,Nombre,Apellido,Email,Nacionalidad,telefono)
+			VALUES
+			(@type_document,@N_document,@Nombre,@Apellido,@Email,@Nacionalidad,@telefono)
+			SET @Mensaje = 'Datos Insertados Correctamente'
+			Print @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 Go
 
 --------------READ-----------------------
@@ -1489,8 +1834,17 @@ As
 		print @Mensaje
 		RETURN
 	END
-
-	SELECT * FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+	BEGIN TRAN
+		BEGIN TRY
+			SELECT * FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
 Go
 
 -------------UPDATE-----------------------
@@ -1558,20 +1912,23 @@ AS
 		print @Mensaje
 		RETURN
 	END
-/*	IF(@SupervisorId is null or len(@SupervisorId)=0)
-	BEGIN
-		SET @Mensaje = 'Error en el campo supervisor el dato ingresado es nulo o fuera de rango'
-		print @Mensaje
-		RETURN
-	END
-	*/
-	UPDATE EMPLEADO 
-	SET Tipo_Doc_Identidad = @Type_document, Uk_Empleado_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono /* Fk_Empleado_Empleado_SupervisorId=@SupervisorId*/
-	WHERE Pk_Empleado_Id = @EmpleadoId
-	SET @Mensaje = 'Datos Actualizados Correctamente'
-
-	Print @Mensaje
-
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE EMPLEADO 
+			SET Tipo_Doc_Identidad = @Type_document, Uk_Empleado_Nro_Doc_Identidad = @N_document,Nombre = @Nombre,Apellido = @Apellido,Email = @Email,Nacionalidad = @Nacionalidad, telefono = @telefono /* Fk_Empleado_Empleado_SupervisorId=@SupervisorId*/
+			WHERE Pk_Empleado_Id = @EmpleadoId
+			SET @Mensaje = 'Datos Actualizados Correctamente'
+			Print @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 Go
 
 --------------DELETE-----------------
@@ -1589,10 +1946,21 @@ AS
 		RETURN
 	END
 
-	DELETE FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
-
-	SET @Mensaje = 'Datos Eliminados Correctamente'
-	Print @Mensaje
+	BEGIN TRAN
+		BEGIN TRY
+			DELETE FROM EMPLEADO WHERE Pk_Empleado_Id = @EmpleadoId
+			SET @Mensaje = 'Datos Eliminados Correctamente'
+			Print @Mensaje
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 Go
 
 
@@ -1605,10 +1973,21 @@ CREATE TRIGGER INSERTAR_EMPLEADO_HISTORIAL
 ON EMPLEADO
 FOR DELETE
 as
-	INSERT INTO EMPLEADO_HISTORIAL(Empleado_Id, Tipo_Doc_Identidad, Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono)
-	SELECT 
-	Pk_Empleado_Id, Tipo_Doc_Identidad, Uk_Empleado_Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono
-	FROM DELETED
+	DECLARE @Mensaje nvarchar(200)
+	BEGIN TRAN
+		BEGIN TRY
+			INSERT INTO EMPLEADO_HISTORIAL(Empleado_Id, Tipo_Doc_Identidad, Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono)
+			SELECT 
+			Pk_Empleado_Id, Tipo_Doc_Identidad, Uk_Empleado_Nro_Doc_Identidad, Nombre, Apellido, Email, Nacionalidad, telefono
+			FROM DELETED
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
 Go
 
 /*TRIGGER DE INSERCION HISTORIAL_EMPLEADO_CONTRATOS*/
@@ -1630,6 +2009,7 @@ as
 	DECLARE @Años int
 	DECLARE @Meses int
 	DECLARE @Dias int
+	DECLARE @Mensaje nvarchar(200)
 
 	SET @ContratoID  = (SELECT Pk_Contrato_Id FROM Inserted)
 	SET @EmpleadoID = (SELECT Fk_Empleado_EmpleadoContratos_EmpleadoId FROM Inserted)
@@ -1644,16 +2024,83 @@ as
 	SET @Meses = (SELECT DATEDIFF(MONTH,@fechaI,@fechaF))
 	SET @Dias = (SELECT DATEDIFF(DAY,@fechaI,@fechaF))
 
-
-	INSERT INTO EMPLEADO_CONTRATO_HISTORIAL 
-	VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
-
+	BEGIN TRAN
+		BEGIN TRY
+			INSERT INTO EMPLEADO_CONTRATO_HISTORIAL 
+			VALUES(@EmpleadoID,@ContratoID,@fechaI,@fechaF,@SueldoB,@Comisionvta,@PuestoID,@DepartamentoID,@Años,@Meses,@Dias)
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+	
+	
 Go
+
+/*TRIGGER DE UPDATE HISTORIAL_EMPLEADO_CONTRATOS*/
+DROP TRIGGER IF EXISTS UPDATE_EMPLEADO_CONTRATO_HISTORIAL_V1
+GO
+CREATE TRIGGER UPDATE_EMPLEADO_CONTRATO_HISTORIAL_V1
+ON EMPLEADO_CONTRATOS
+FOR UPDATE
+AS
+	DECLARE 
+	@IdContrato int,
+	@IdEmpleado int,
+	@FechaI date,
+	@FechaF date,
+	@SueldoB decimal(6,2),
+	@ComisionVTA decimal(5,2),
+	@PuestoId int,
+	@DepartamentoId int,
+	@Años int,
+	@Meses int,
+	@Dias int,
+	@Mensaje nvarchar(100)
+	
+	SET NOCOUNT ON;
+	SELECT @IdContrato= Pk_Contrato_Id FROM deleted;
+	SELECT @IdEmpleado= Fk_Empleado_EmpleadoContratos_EmpleadoId FROM deleted;
+	SELECT @FechaI=Fecha_Inicio FROM inserted;
+	SELECT @FechaF=Fecha_Termino FROM inserted;
+	SELECT @SueldoB = Sueldo_Basico FROM inserted;
+	SELECT @ComisionVTA = Comision_vta FROM inserted;
+	SELECT @PuestoId = Fk_Puesto_EmpleadoContratos_PuestoId FROM inserted;
+	SELECT @DepartamentoId = Fk_Departamento_EmpleadoContratos_DepartamentoId FROM inserted;
+	
+	SET @Años = (SELECT DATEDIFF(YEAR,@FechaI,@FechaF))
+	SET @Meses = (SELECT DATEDIFF(MONTH,@FechaI,@FechaF))
+	SET @Dias = (SELECT DATEDIFF(DAY,@FechaI,@FechaF))
+
+	BEGIN TRAN
+		BEGIN TRY
+			UPDATE EMPLEADO_CONTRATO_HISTORIAL 
+			SET [Fecha_Inicio]=@FechaI,
+			[Fecha_Termino]=@FechaF,
+			[Sueldo_Basico]=@SueldoB,
+			[Comision_Vta]=@ComisionVTA,
+			[Puesto_Id]=@PuestoId,
+			[Departamento_Id]=@DepartamentoId,
+			[Años_Servicio]=@Años,
+			[Meses_Servicio]=@Meses,
+			[Dias_Servicio]=@Dias 
+			Where Pk_Contrato_Id = @IdContrato
+			COMMIT TRAN
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN
+			SET @Mensaje = 'Error en la transacción: '
+			PRINT @Mensaje
+			SELECT ERROR_MESSAGE() AS ErrorMessage
+		END CATCH
+GO
 
 --================================================
 --			Inserción de Datos(Para Prueba)
 --================================================
-
 
 EXEC sp_InsertarPuesto 'Contaduria',4500.50,930.90
 GO
@@ -1683,14 +2130,6 @@ EXEC sp_Insert_Supervisor 1, 1
 GO
 
 /*
-(ROSALES) COMENTARIOS DE MODIFICACIÓN:
-
-	- Se creó la restricción FOREIGN KEY de la tabla EMPLEADO a Supervisor
-	
-	- Se creo El CRUD de la tabla Supervisor
-	- Se Crearon los View de las tablas que contenian Fk, haciendo un join por cada Fk
-	
-	Comprobar: 
 	Select * from vp_Select_EmpleadoContratos
 	GO
 	SELECT * FROM vp_Select_Supervisor
@@ -1707,11 +2146,4 @@ GO
 	GO
 	SELECT * FROM USUARIO
 	GO
-*/
-
-/*ESPINOZA
-
-SE CORREGIERON LOS 3 ERRORES Y SE PROBO LOS SELECT
-TODOS CON RESPUESTA SATISFACTORIA
-
 */
